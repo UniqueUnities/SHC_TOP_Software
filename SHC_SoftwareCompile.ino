@@ -169,7 +169,18 @@
   #define NOTE_AS10 29834.480
   #define NOTE_B10  31608.528
 
+//Aircraft States:
+  enum piracyStates {
+    PIRATE = 0;
+    STANDBY;
+    LAUNCH;
+    FLIGHT;
+    LANDED;
+    CAPTAIN;
+  }
+
 //Global Variables (REVIEW: Ensure Descriptive Names & Implement Comments):
+  enum piracyStates State = PIRATE;
   const int SEALEVELPRESSURE_HPA 1013.25  //REVIEW: Can This Be A Const Float?
   const int msPullRate = 100; //Time Between Sensor Data Pulls
   int msLastPull = 0; //Sensor Data Pulls
@@ -184,6 +195,7 @@
   int stateLED = LOW;
   int msLastNote = 0; //Buzzer Melody
   float duration = 0; //Duration Of Buzzer Notes
+  bool buzzerSounded = false; //Ensures Buzzer Only Plays Once
   int lastTime = 0;  //Simple Local Timer To Limit SPI Traffic
   long baud = 9600; //uart
   bool state = false; //uart
@@ -263,6 +275,7 @@ void printEvent(sensors_event_t* event) {
 }
 
 void setup() {
+  piracyStates STATE = PIRATE;
   //Initialize Pin Modes:
     Serial.println(F("{DEBUG - SETUP TEST: Initializing Pin Modes...}"));
     Serial.begin(115200); //REVIEW: Why 115200?
@@ -357,14 +370,72 @@ void setup() {
       Serial.println(F("{DEBUG - SETUP SUCCESS: HC12 Serial Link Initialized! :>}"));
   }
   Serial.println(F("{DEBUG - SETUP SUCCESS: All Tests Complete; Control Passed To System Loop!! :D}"));
+  STATE = STANDBY;
 }
 
 void loop() {
   //Loop-Related Variables:
     //int msLoopBegin = millis();
     //int msLoop = -1;
+  
+  //REVIEW: Implement When Sand Deposit Switch Flipped
+    //Buzzer Melody:
+      if(!buzzerSounded) {
+        //Serial.println("{DEBUG - LOOP CALC: Buzzer Notes (" + String(millis() - msLastNote()) + "ms >= " + String(duration * 1.30) + "ms)}");
+        if((noteSeq < size) && (millis() - msLastNote >= duration * 1.30)) {
+          noTone(BUZZER_PIN); //Stop Playing On The Buzzer
+          msLastNote = millis();
+          duration = 60 / BPM / (durations[noteSeq]/4); //Duration(sec) Of Given Note
+          tone(BUZZER_PIN, notesArr[noteSeq], duration);
+          noteSeq++;
+        }
+        if(noteSeq == size) {
+          buzzerSounded = true;
+        }
+      }
 
-  //Output Sensor Data
+  switch(STATE) { //State Machine
+    case 0: //PIRATE
+      //REVIEW: Create Way To Determine State If Default Reached
+      break;
+    case 1: //STANDBY
+      //REVIEW: Store Ground Level
+      if(false) { //REVIEW: Signal To Move
+        STATE = LAUNCH;
+      }
+      break;
+    case 2: //LAUNCH
+      //REVIEW: Sensor Data
+      if(false) { //REVIEW: In Flight; Altitude > Ground Level
+        STATE = FLIGHT;
+      }
+      break;
+    case 3: //FLIGHT
+      //REVIEW: Sensor Data
+      //REVIEW: If Descending (Altitude != (prevAlt +- error))
+        //If Buzzer Has Not Played Freebird, Play It!
+      if(false) { //REVIEW: Finished Flight; Altitude == Ground Level
+        STATE = LANDED;
+      }
+      break;
+    case 4: //LANDED
+      //REVIEW: Sensor Data
+      if(false) { //REVIEW: Stopped Moving
+        STATE = CAPTAIN
+      }
+      break;
+    case 5: //CAPTAIN
+      //REVIEW: Stop Storing Sensor Data
+        //Prepare For Data Analysis:
+          //Parse All Data; Check If Realistic (Too Small/Large) and Unrealistic
+          //Update Min/Max Values & Create Summary
+          //Generate Data Plots As Function of Time
+      break;
+    default:
+
+  }
+  
+  //Output Sensor Data (REVIEW: Implement Data Analysis):
     //Serial.println("{DEBUG - LOOP CALC: Time Since Last Sensor Data Pull " + String(millis()-msLastPull) + "ms.}");
     if(millis() - msLastPull >= msPullRate) {
       Serial.println("Current Time: " + String(millis()) + "ms");
@@ -419,7 +490,7 @@ void loop() {
     }
     Serial.println(F("{DEBUG - LOOP SUCCESS: All Sensor Data Successfully Read! :>}"));
 
-  //SD Card Storage (REVIEW: Implementation Past Tests):
+  //SD Card Storage (REVIEW: Implement Beyond Tests):
   if(millis() - msLastWrite >= msWriteRate) { //Review: Can We Open The File Before Compiling Data To Send; It Would Be Optimal?
     Serial.println("{DEBUG - LOOP CHANGE: Preparing Data Transfer To SD Card...}");
     String dataString = "Hello World!"; //String For Assembling Data To Log
@@ -474,16 +545,6 @@ void loop() {
         Serial.println("; Switching LED State (On -> Off)}");
       }
       digitalWrite(LED_WHITE, stateLED)
-    }
-
-  //Buzzer Melody:
-    //Serial.println("{DEBUG - LOOP CALC: Buzzer Notes (" + String(millis() - msLastNote()) + "ms >= " + String(duration * 1.30) + "ms)}");
-    if((noteSeq < size) && (millis() - msLastNote >= duration * 1.30)) {
-      noTone(BUZZER_PIN); //Stop Playing On The Buzzer
-      msLastNote = millis();
-      duration = 60 / BPM / (durations[noteSeq]/4); //Duration(sec) Of Given Note
-      tone(BUZZER_PIN, notesArr[noteSeq], duration);
-      noteSeq++;
     }
 
   /*Delay For Loop Cycles: Removed As A Better Solution Exists (If Statements)
