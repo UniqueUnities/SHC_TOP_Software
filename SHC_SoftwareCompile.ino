@@ -43,35 +43,11 @@
     #define BMP_CS 10
     Instantiate Instance of SPI Class: #define spiPort SPI //Standard SPI Port*/
   SFE_UBLOX_GNSS myGNSS;
-  Adafruit_BMP3XX bmp;
+  Adafruit_BMP388 bmp;
   Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28, &Wire); //Check I2C Device Address
 
 //NoteVoltage.h (Voltage -> Notes):
   #define REST     0
-  #define NOTE_C1	 32.703
-  #define NOTE_CS1 34.647
-  #define NOTE_D1  36.708
-  #define NOTE_DS1 38.890
-  #define NOTE_E1  41.203
-  #define NOTE_F1  43.653
-  #define NOTE_FS1 46.249
-  #define NOTE_G1  48.999
-  #define NOTE_GS1 51.913
-  #define NOTE_A1  55.000
-  #define NOTE_AS1 58.270
-  #define NOTE_B1  61.735
-  #define NOTE_C2  65.406
-  #define NOTE_CS2 69.296
-  #define NOTE_D2  73.416
-  #define NOTE_DS2 77.782
-  #define NOTE_E2  82.407
-  #define NOTE_F2  87.307
-  #define NOTE_FS2 92.499
-  #define NOTE_G2  97.999
-  #define NOTE_GS2 103.826
-  #define NOTE_A2  110.000
-  #define NOTE_AS2 116.541
-  #define NOTE_B2  123.471
   #define NOTE_C3  130.813
   #define NOTE_CS3 138.591
   #define NOTE_D3  146.832
@@ -108,66 +84,6 @@
   #define NOTE_A5  880.000
   #define NOTE_AS5 932.328
   #define NOTE_B5  987.767
-  #define NOTE_C6  1046.502
-  #define NOTE_CS6 1108.731
-  #define NOTE_D6  1174.659
-  #define NOTE_DS6 1244.508
-  #define NOTE_E6  1318.510
-  #define NOTE_F6  1396.913
-  #define NOTE_FS6 1479.978
-  #define NOTE_G6  1567.982
-  #define NOTE_GS6 1661.219
-  #define NOTE_A6  1760.000
-  #define NOTE_AS6 1864.655
-  #define NOTE_B6  1975.533
-  #define NOTE_C7  2093.005
-  #define NOTE_CS7 2217.461
-  #define NOTE_D7  2349.318
-  #define NOTE_DS7 2489.016
-  #define NOTE_E7  2637.020
-  #define NOTE_F7  2793.826
-  #define NOTE_FS7 2959.955
-  #define NOTE_G7  3135.963
-  #define NOTE_GS7 3322.438
-  #define NOTE_A7  3520.000
-  #define NOTE_AS7 3729.310
-  #define NOTE_B7  3951.066
-  #define NOTE_C8  4186.009
-  #define NOTE_CS8 4434.922
-  #define NOTE_D8  4698.636
-  #define NOTE_DS8 4978.032
-  #define NOTE_E8  5274.041
-  #define NOTE_F8  5587.652
-  #define NOTE_FS8 5919.911
-  #define NOTE_G8  6271.927
-  #define NOTE_GS8 6644.875
-  #define NOTE_A8  7040.000
-  #define NOTE_AS8 7458.620
-  #define NOTE_B8  7902.133
-  #define NOTE_C9  8372.018
-  #define NOTE_CS9 8869.844
-  #define NOTE_D9  9397.272
-  #define NOTE_DS9 9956.064
-  #define NOTE_E9  10548.082
-  #define NOTE_F9  11175.304
-  #define NOTE_FS9 11839.822
-  #define NOTE_G9  12543.854
-  #define NOTE_GS9 13289.750
-  #define NOTE_A9  14080.000
-  #define NOTE_AS9 14917.240
-  #define NOTE_B9  15804.264
-  #define NOTE_C10 16744.036
-  #define NOTE_CS10 17739.688
-  #define NOTE_D10  18794.544
-  #define NOTE_DS10 19912.128
-  #define NOTE_E10  21096.164
-  #define NOTE_F10  22350.608
-  #define NOTE_FS10 23679.644
-  #define NOTE_G10  25087.708
-  #define NOTE_GS10 26579.500
-  #define NOTE_A10  28160.000
-  #define NOTE_AS10 29834.480
-  #define NOTE_B10  31608.528
 
 //Aircraft States:
   enum piracyStates {
@@ -182,6 +98,7 @@
 //Global Variables (REVIEW: Ensure Descriptive Names & Implement Comments):
   enum piracyStates State = PIRATE;
   const int SEALEVELPRESSURE_HPA 1013.25  //REVIEW: Can This Be A Const Float?
+  int groundLevel = 0;  //REVIEW: Set Ground Level
   const int msPullRate = 100; //Time Between Sensor Data Pulls
   int msLastPull = 0; //Sensor Data Pulls
   const int msGNSSPullRate = 1000;  //Higher Rate Between GNSS Data Pulls To Limit SPI Traffic
@@ -196,7 +113,6 @@
   int msLastNote = 0; //Buzzer Melody
   float duration = 0; //Duration Of Buzzer Notes
   bool buzzerSounded = false; //Ensures Buzzer Only Plays Once
-  int lastTime = 0;  //Simple Local Timer To Limit SPI Traffic
   long baud = 9600; //uart
   bool state = false; //uart
   const int BPM = 142;  //Mr. Sandman BPM
@@ -209,73 +125,18 @@
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 2, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 8, 8, 4, 8, 2, 8, 8, 8, 4, 2, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 4, 8, 8, 8, 8, 4, 8, 8, 8, 8, 8, 4, 4, 4, 8, 8, 8, 8, 8, 8, 8, 4, 4, 8, 4, 8, 8, 4, 8, 2, 8, 8, 8, 4, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 4, 4, 8, 4, 8, 8, 8, 2, 4, 8, 8, 4, 4, 8, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 2, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 2, 1, 8
   };
 
-//Printing Values (REVIEW: Thorough Testing):
-void printEvent(sensors_event_t* event) {
-  double x = -1000000, y = -1000000 , z = -1000000; //Error-Checking Values
-  if (event->type == SENSOR_TYPE_ORIENTATION) {
-    Serial.print("Orient:");
-    x = event->orientation.x; //yaw
-    y = event->orientation.y; //roll
-    z = event->orientation.z; //pitch
-    Serial.print("\tyaw= ");
-    Serial.print(x);
-    Serial.print(" |\troll= ");
-    Serial.print(y);
-    Serial.print(" |\tpitch= ");
-    Serial.println(z);
-  }
-  else if (event->type == SENSOR_TYPE_MAGNETIC_FIELD) {
-    Serial.print("Mag:");
-    x = event->magnetic.x;
-    y = event->magnetic.y;
-    z = event->magnetic.z;
-  }
-  /*Accelerometer (REVIEW: Commented; Do We Plan On Exlcuding?):
-    if(event->type == SENSOR_TYPE_ACCELEROMETER) {
-      Serial.print("Accl:");
-      x = event->acceleration.x;
-      y = event->acceleration.y;
-      z = event->acceleration.z;
-    }*/
-  /*Gyroscope (REVIEW: Commented; Do We Plan On Exlcuding?):
-    else if (event->type == SENSOR_TYPE_GYROSCOPE) {
-      Serial.print("Gyro:");
-      x = event->gyro.x;
-      y = event->gyro.y;
-      z = event->gyro.z;
-    }*/
-  /*Rotation Vecotr (REVIEW: Commented; Do We Plan On Exlcuding?):
-    else if (event->type == SENSOR_TYPE_ROTATION_VECTOR) {
-      Serial.print("Rot:");
-      x = event->gyro.x;
-      y = event->gyro.y;
-      z = event->gyro.z;
-    }*/
-  /*Linear Acceleration (REVIEW: Commented; Do We Plan On Exlcuding?):
-    else if (event->type == SENSOR_TYPE_LINEAR_ACCELERATION) {
-      Serial.print("Linear:");
-      x = event->acceleration.x;
-      y = event->acceleration.y;
-      z = event->acceleration.z;
-    }*/
-  /*Gravity (REVIEW: Commented; Do We Plan On Exlcuding?):
-    else if (event->type == SENSOR_TYPE_GRAVITY) {
-      Serial.print("Gravity:");
-      x = event->acceleration.x;
-      y = event->acceleration.y;
-      z = event->acceleration.z;
-    }*/
-  else return;
-  Serial.print("\tx= ");
-  Serial.print(x);
-  Serial.print(" |\ty= ");
-  Serial.print(y);
-  Serial.print(" |\tz= ");
-  Serial.println(z);
-}
+void printEvent(sensors_event_t* event);
 
 void setup() {
-  piracyStates STATE = PIRATE;
+  piracyStates STATE = STANDBY;
+  //Wait For Serial Monitor Availability (REVIEW: Is This Needed?):
+    Serial.println(F("{DEBUG - SETUP TEST: Testing Serial Monitor Availability...}"));
+    while(!Serial) { //Wait For Serial Port To Open In Terminal; Needed For Native USB Port Only
+      Serial.println(F("{DEBUG - SETUP ERROR: Serial Monitor Not Yet Available; Testing Again. :<)}"));
+      delay(10);
+    }
+    Serial.println(F("{DEBUG - SETUP Success: Serial Monitor Available! :>}"));
+
   //Initialize Pin Modes:
     Serial.println(F("{DEBUG - SETUP TEST: Initializing Pin Modes...}"));
     Serial.begin(115200); //REVIEW: Why 115200?
@@ -293,25 +154,17 @@ void setup() {
       Serial.println("{DEBUG - SUCCESS: Set-Up SDA & SCL Wires! :>}");*/
     Serial.println(F("{DEBUG - SETUP SUCCESS: Pin Modes Initialized! :>}"));
 
-  //Wait For Serial Monitor Availability (REVIEW: Is This Needed?):
-    Serial.println(F("{DEBUG - SETUP TEST: Testing Serial Monitor Availability...}"));
-    while(!Serial) { //Wait For Serial Port To Open In Terminal; Needed For Native USB Port Only
-      Serial.println(F("{DEBUG - SETUP ERROR: Serial Monitor Not Yet Available; Testing Again. :<)}"));
-      delay(10);
-    }
-    Serial.println(F("{DEBUG - SETUP Success: Serial Monitor Available! :>}"));
-
-  //Initialize BMP3XX, BNO055, & GNSS Sensors:
+  //Initialize BMP388, BNO055, & GNSS Sensors:
     Serial.println(F("{DEBUG - SETUP TEST: Initializing Sensors...}"));
-    Serial.println(F("{DEBUG - SETUP TEST: Initializing BMP3XX Sensor...}"));
+    Serial.println(F("{DEBUG - SETUP TEST: Initializing BMP388 Sensor...}"));
     if (!bmp.begin_I2C()) { //Testing Hardware I2C Mode
-      Serial.println(F("{DEBUG - SETUP ERROR: Could Not Find Valid BMP3XX Sensor; Check Wiring. :<)}"));
+      Serial.println(F("{DEBUG - SETUP ERROR: Could Not Find Valid BMP388 Sensor; Check Wiring. :<)}"));
     }
     bmp.setTemperatureOversampling(BMP3_OVERSAMPLING_8X);
     bmp.setPressureOversampling(BMP3_OVERSAMPLING_4X);
     bmp.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_3);
     bmp.setOutputDataRate(BMP3_ODR_50_HZ);
-    Serial.println(F("{DEBUG - SETUP SUCCESS: BMP3XX Sensor Initialized! :>}"));
+    Serial.println(F("{DEBUG - SETUP SUCCESS: BMP388 Sensor Initialized! :>}"));
     Serial.println(F("{DEBUG - SETUP TEST: Initializing BNO055 Sensor...}"));
     if(!bno.begin()) {
       Serial.print(F("{DEBUG - SETUP ERROR: Could Not Find Valid BNO055 Sensor; Check Wiring & I2C ADDR. :<}"));
@@ -353,7 +206,7 @@ void setup() {
           return;
         }*/
     if(!SD.begin(chipSelect)) {
-      Serial.println("{DEBUG - SETUP ERROR: SD Card Initalization Failed. :<}");
+      Serial.println(F("{DEBUG - SETUP ERROR: SD Card Initalization Failed. :<}"));
     }
     /*Determine If Card Present (REVIEW: Should This Be Commented?):
       if (!sdInitialized) {
@@ -370,13 +223,28 @@ void setup() {
       Serial.println(F("{DEBUG - SETUP SUCCESS: HC12 Serial Link Initialized! :>}"));
   }
   Serial.println(F("{DEBUG - SETUP SUCCESS: All Tests Complete; Control Passed To System Loop!! :D}"));
-  STATE = STANDBY;
 }
 
 void loop() {
   //Loop-Related Variables:
     //int msLoopBegin = millis();
     //int msLoop = -1;
+  
+  //Blink LED:
+    //Serial.println("{DEBUG - LOOP CALC: Time Since Last Blink " + String(millis()-msLastBlink) + "ms}");
+    if(millis() - msLastBlink >= msBlinkRate {
+      Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastBlink) + "ms >= " + String(msBlinkRate) + "ms.");
+      msLastBlink = millis();    
+      if(stateLED = LOW) {
+        stateLED = HIGH;
+        Serial.println("; Switching LED State (Off -> On)}");
+      }
+      else {
+        stateLED = LOW;
+        Serial.println("; Switching LED State (On -> Off)}");
+      }
+      digitalWrite(LED_WHITE, stateLED)
+    }
   
   //REVIEW: Implement When Sand Deposit Switch Flipped
     //Buzzer Melody:
@@ -439,17 +307,17 @@ void loop() {
     //Serial.println("{DEBUG - LOOP CALC: Time Since Last Sensor Data Pull " + String(millis()-msLastPull) + "ms.}");
     if(millis() - msLastPull >= msPullRate) {
       Serial.println("Current Time: " + String(millis()) + "ms");
-      Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastPull) + "ms >= " + String(msPullRate) + "ms; Pulling BMP3XX & BNO055 Sensor Data...}");
+      Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastPull) + "ms >= " + String(msPullRate) + "ms; Pulling BMP388 & BNO055 Sensor Data...}");
       if(!bmp.performReading()) { //Review (Test): Implement System To Redo Reading If Error
-        Serial.println(F("{DEBUG - LOOP ERROR: BMP3XX Failed To Perform Reading. :<}"));
+        Serial.println(F("{DEBUG - LOOP ERROR: BMP388 Failed To Perform Reading. :<}"));
         continue;
       }
       msLastPull = millis();
-      Serial.println(F("{DEBUG - LOOP SUCCESS: BMP3XX Successfully Read; Now Outputting Data:}"));
+      Serial.println(F("{DEBUG - LOOP SUCCESS: BMP388 Successfully Read; Now Outputting Data:}"));
       Serial.println("Temperature: " + String(bmp.temperature) + "*C");
       Serial.println("Pressure: " + String(bmp.pressure / 100.0) + "hPa");
       Serial.print("Approx. Altitude: " + String(bmp.readAltitude(SEALEVELPRESSURE_HPA)) + "m");
-      Serial.println(F("{DEBUG - LOOP READING: BMP3XX Read, Now Reading From BNO055...}"));
+      Serial.println(F("{DEBUG - LOOP READING: BMP388 Read, Now Reading From BNO055...}"));
       //REVIEW: Implement Way To Verify Errorless Data Pull?
       sensors_event_t orientationData, magnetometerData; //Additional Data Points: angVelocityData , linearAccelData, accelerometerData, gravityData
       bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
@@ -520,6 +388,7 @@ void loop() {
     if(millis() - msLastRadio >= msRadioRate) {
       digitalWrite(LED_BUILTIN, state); //REVIEW: What Is The Purpose Of This Line?
       HC12.println("test123");
+      msLastRadio = millis();
       Serial.println("{DEBUG - LOOP SUCCESS: Data Successfully Transmitted To HC12 Radio! :>}");
       state != state;
       /*Recieve From Ground Station:
@@ -530,26 +399,75 @@ void loop() {
             Serial.print(char(HC12.read()));
           }
         }*/
-        
-  //Blink LED:
-    //Serial.println("{DEBUG - LOOP CALC: Time Since Last Blink " + String(millis()-msLastBlink) + "ms}");
-    if(millis() - msLastBlink >= msBlinkRate {
-      Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastBlink) + "ms >= " + String(msBlinkRate) + "ms.");
-      msLastBlink = millis();    
-      if(stateLED = LOW) {
-        stateLED = HIGH;
-        Serial.println("; Switching LED State (Off -> On)}");
-      }
-      else {
-        stateLED = LOW;
-        Serial.println("; Switching LED State (On -> Off)}");
-      }
-      digitalWrite(LED_WHITE, stateLED)
-    }
 
   /*Delay For Loop Cycles: Removed As A Better Solution Exists (If Statements)
     msLoop = millis()-msLoopBegin();
     Serial.println("{DEBUG - LOOP CALC: Total Loop Duration " + String(msLoop) + "ms | Delay " + String(msRate-msLoop) + " Until Next}");
     Serial.println();
     delay(msRate-msLoop)); //Keep Rate of 10hz*/
+}
+
+//Printing Values (REVIEW: Thorough Testing):
+void printEvent(sensors_event_t* event) {
+  double x = -1000000, y = -1000000 , z = -1000000; //Error-Checking Values
+  if (event->type == SENSOR_TYPE_ORIENTATION) {
+    Serial.print("Orient:");
+    x = event->orientation.x; //yaw
+    y = event->orientation.y; //roll
+    z = event->orientation.z; //pitch
+    Serial.print("\tyaw= ");
+    Serial.print(x);
+    Serial.print(" |\troll= ");
+    Serial.print(y);
+    Serial.print(" |\tpitch= ");
+    Serial.println(z);
+  }
+  else if (event->type == SENSOR_TYPE_MAGNETIC_FIELD) {
+    Serial.print("Mag:");
+    x = event->magnetic.x;
+    y = event->magnetic.y;
+    z = event->magnetic.z;
+  }
+  /*Accelerometer (REVIEW: Commented; Do We Plan On Exlcuding?):
+    if(event->type == SENSOR_TYPE_ACCELEROMETER) {
+      Serial.print("Accl:");
+      x = event->acceleration.x;
+      y = event->acceleration.y;
+      z = event->acceleration.z;
+    }*/
+  /*Gyroscope (REVIEW: Commented; Do We Plan On Exlcuding?):
+    else if (event->type == SENSOR_TYPE_GYROSCOPE) {
+      Serial.print("Gyro:");
+      x = event->gyro.x;
+      y = event->gyro.y;
+      z = event->gyro.z;
+    }*/
+  /*Rotation Vecotr (REVIEW: Commented; Do We Plan On Exlcuding?):
+    else if (event->type == SENSOR_TYPE_ROTATION_VECTOR) {
+      Serial.print("Rot:");
+      x = event->gyro.x;
+      y = event->gyro.y;
+      z = event->gyro.z;
+    }*/
+  /*Linear Acceleration (REVIEW: Commented; Do We Plan On Exlcuding?):
+    else if (event->type == SENSOR_TYPE_LINEAR_ACCELERATION) {
+      Serial.print("Linear:");
+      x = event->acceleration.x;
+      y = event->acceleration.y;
+      z = event->acceleration.z;
+    }*/
+  /*Gravity (REVIEW: Commented; Do We Plan On Exlcuding?):
+    else if (event->type == SENSOR_TYPE_GRAVITY) {
+      Serial.print("Gravity:");
+      x = event->acceleration.x;
+      y = event->acceleration.y;
+      z = event->acceleration.z;
+    }*/
+  else return;
+  Serial.print("\tx= ");
+  Serial.print(x);
+  Serial.print(" |\ty= ");
+  Serial.print(y);
+  Serial.print(" |\tz= ");
+  Serial.println(z);
 }
