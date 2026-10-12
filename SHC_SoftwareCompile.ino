@@ -229,7 +229,6 @@ void loop() {
   //Loop-Related Variables:
     //int msLoopBegin = millis();
     //int msLoop = -1;
-  
   //Blink LED:
     //Serial.println("{DEBUG - LOOP CALC: Time Since Last Blink " + String(millis()-msLastBlink) + "ms}");
     if(millis() - msLastBlink >= msBlinkRate {
@@ -316,22 +315,23 @@ void loop() {
       Serial.println(F("{DEBUG - LOOP SUCCESS: BMP388 Successfully Read; Now Outputting Data:}"));
       Serial.println("Temperature: " + String(bmp.temperature) + "*C");
       Serial.println("Pressure: " + String(bmp.pressure / 100.0) + "hPa");
-      Serial.print("Approx. Altitude: " + String(bmp.readAltitude(SEALEVELPRESSURE_HPA)) + "m");
+      //Serial.print("Approx. Altitude: " + String(bmp.readAltitude(SEALEVELPRESSURE_HPA)) + "m");
       Serial.println(F("{DEBUG - LOOP READING: BMP388 Read, Now Reading From BNO055...}"));
       //REVIEW: Implement Way To Verify Errorless Data Pull?
-      sensors_event_t orientationData, magnetometerData; //Additional Data Points: angVelocityData , linearAccelData, accelerometerData, gravityData
+      sensors_event_t orientationData, linearAccelData; //Additional Data Points: angVelocityData, accelerometerData, gravityData, magnetometerData
       bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
       printEvent(&orientationData); //REVIEW: Is It Possible To Combine These Two Lines?
-      bno.getEvent(&magnetometerData, Adafruit_BNO055::VECTOR_MAGNETOMETER);
-      printEvent(&magnetometerData);  //REVIEW: Is It Possible To Combine These Two Lines?
+      bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
+      printEvent(&linearAccelData);  //REVIEW: Is It Possible To Combine These Two Lines?
       /*Additional Data Points (REVIEW: Either Include Or Remove):
         bno.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
         bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
         bno.getEvent(&accelerometerData, Adafruit_BNO055::VECTOR_ACCELEROMETER);
+        bno.getEvent(&magnetometerData, Adafruit_BNO055::VECTOR_MAGNETOMETER);
         bno.getEvent(&gravityData, Adafruit_BNO055::VECTOR_GRAVITY);*/
 
 
-      int8_t boardTemp = bno.getTemp();
+      /*int8_t boardTemp = bno.getTemp();
       Serial.println("\nBoard Temperature: " + String(boardTemp));
       Serial.println(F("{DEBUG - LOOP READING: Reading BNO055 Calibration Data:}"));
       uint8_t system, gyro, accel, mag = 0;
@@ -340,7 +340,7 @@ void loop() {
       Serial.println("Sys = " + String(system));
       Serial.println("Gyro = " + String(gyro));
       Serial.println("Accel = " + String(accel));
-      Serial.println("Mag = " + String(mag));
+      Serial.println("Mag = " + String(mag));*/
     }   
     //Serial.println("{DEBUG - LOOP CALC: Time Since Last GNSS Data Pull " + String(millis()-msLastGNSSPull) + "ms}");
     if(millis() - msLastGNSSPull >= msGNSSPullRate) {
@@ -350,10 +350,12 @@ void loop() {
       long latitude = myGNSS.getLatitude();
       long longitude = myGNSS.getLongitude();
       long altitude = myGNSS.getAltitude();
+      long speed_mms = myGNSS.getGroundSpeed(); 
       byte SIV = myGNSS.getSIV();
       Serial.println("Lat: " + String(latitude) + " (degrees * 10^-7)");
       Serial.println("Long: " + String(longitude) + " (degrees * 10^-7)");
       Serial.println("Alt: " + String(altitude) + "nm");
+      Serial.println("Speed: " + String(speed_mms) + "(mm/s)");
       Serial.println("SIV: " + String(SIV));
     }
     Serial.println(F("{DEBUG - LOOP SUCCESS: All Sensor Data Successfully Read! :>}"));
@@ -361,7 +363,7 @@ void loop() {
   //SD Card Storage (REVIEW: Implement Beyond Tests):
   if(millis() - msLastWrite >= msWriteRate) { //Review: Can We Open The File Before Compiling Data To Send; It Would Be Optimal?
     Serial.println("{DEBUG - LOOP CHANGE: Preparing Data Transfer To SD Card...}");
-    String dataString = "Hello World!"; //String For Assembling Data To Log
+    String dataString = ""; //String For Assembling Data To Log
     /*Append Sensor Data To String (REVIEW: Implement):
       for (int analogPin = 0; analogPin < 3; analogPin++) {
         int sensor = analogRead(analogPin);
@@ -370,6 +372,43 @@ void loop() {
           dataString += ",";
         }
       }*/
+    /*dataString += time;
+    dataString += ",";
+
+    dataString += longitude;
+    dataString += ",";
+
+    dataString += latitude;
+    dataString += ",";
+
+    dataString += altitude;
+    dataString += ",";
+
+    dataString += pressure;
+    dataString += ",";
+
+    dataString += temperature;
+    dataString += ",";
+
+    dataString += roll;
+    dataString += ",";
+
+    dataString += pitch;
+    dataString += ",";
+
+    dataString += yaw;
+    dataString += ",";
+
+    dataString += Ax;
+    dataString += ",";
+
+    dataString += Ay;
+    dataString += ",";
+
+    dataString += Az;
+    dataString += ",";
+
+    dataString += speed;*/
     //dataString += (data1 + ", " + data2 + ", " data3; //Convert Loop Above To Coe Below When Sensor Programs Join With This One (They Now Have!) | Repeat For All Data Stored
     Serial.println("{DEBUG - LOOP CHANGE: Data Compiled; Now Writing In SD Card...}");
     File dataFile = SD.open("datalog.csv", FILE_WRITE); //Open File (Only One File Can Open At A Time)
@@ -387,7 +426,45 @@ void loop() {
   //HC12 Radio Transmission (REVIEW: Implement Past Test):
     if(millis() - msLastRadio >= msRadioRate) {
       digitalWrite(LED_BUILTIN, state); //REVIEW: What Is The Purpose Of This Line?
-      HC12.println("test123");
+      String dataString = "";
+      /*dataString += time;
+      dataString += ",";
+  
+      dataString += longitude;
+      dataString += ",";
+
+      dataString += latitude;
+      dataString += ",";
+  
+      dataString += altitude;
+      dataString += ",";
+  
+      dataString += pressure;
+      dataString += ",";
+  
+      dataString += temperature;
+      dataString += ",";
+  
+      dataString += roll;
+      dataString += ",";
+  
+      dataString += pitch;
+      dataString += ",";
+  
+      dataString += yaw;
+      dataString += ",";
+  
+      dataString += Ax;
+      dataString += ",";
+  
+      dataString += Ay;
+      dataString += ",";
+  
+      dataString += Az;
+      dataString += ",";
+  
+      dataString += speed;*/
+      HC12.println(dataString);
       msLastRadio = millis();
       Serial.println("{DEBUG - LOOP SUCCESS: Data Successfully Transmitted To HC12 Radio! :>}");
       state != state;
@@ -422,11 +499,17 @@ void printEvent(sensors_event_t* event) {
     Serial.print(" |\tpitch= ");
     Serial.println(z);
   }
-  else if (event->type == SENSOR_TYPE_MAGNETIC_FIELD) {
-    Serial.print("Mag:");
-    x = event->magnetic.x;
-    y = event->magnetic.y;
-    z = event->magnetic.z;
+  else if (event->type == SENSOR_TYPE_LINEAR_ACCELERATION) {
+    Serial.print("Linear:");
+    x = event->acceleration.x;
+    y = event->acceleration.y;
+    z = event->acceleration.z;
+    Serial.print("\tAx= ");
+    Serial.print(x);
+    Serial.print(" |\tAy= ");
+    Serial.print(y);
+    Serial.print(" |\tAz= ");
+    Serial.println(z);
   }
   /*Accelerometer (REVIEW: Commented; Do We Plan On Exlcuding?):
     if(event->type == SENSOR_TYPE_ACCELEROMETER) {
@@ -442,7 +525,7 @@ void printEvent(sensors_event_t* event) {
       y = event->gyro.y;
       z = event->gyro.z;
     }*/
-  /*Rotation Vecotr (REVIEW: Commented; Do We Plan On Exlcuding?):
+  /*Rotation Vector (REVIEW: Commented; Do We Plan On Exlcuding?):
     else if (event->type == SENSOR_TYPE_ROTATION_VECTOR) {
       Serial.print("Rot:");
       x = event->gyro.x;
@@ -450,11 +533,11 @@ void printEvent(sensors_event_t* event) {
       z = event->gyro.z;
     }*/
   /*Linear Acceleration (REVIEW: Commented; Do We Plan On Exlcuding?):
-    else if (event->type == SENSOR_TYPE_LINEAR_ACCELERATION) {
-      Serial.print("Linear:");
-      x = event->acceleration.x;
-      y = event->acceleration.y;
-      z = event->acceleration.z;
+    else if (event->type == SENSOR_TYPE_MAGNETIC_FIELD) {
+    Serial.print("Mag:");
+    x = event->magnetic.x;
+    y = event->magnetic.y;
+    z = event->magnetic.z;
     }*/
   /*Gravity (REVIEW: Commented; Do We Plan On Exlcuding?):
     else if (event->type == SENSOR_TYPE_GRAVITY) {
@@ -463,11 +546,8 @@ void printEvent(sensors_event_t* event) {
       y = event->acceleration.y;
       z = event->acceleration.z;
     }*/
-  else return;
-  Serial.print("\tx= ");
-  Serial.print(x);
-  Serial.print(" |\ty= ");
-  Serial.print(y);
-  Serial.print(" |\tz= ");
-  Serial.println(z);
+  else {
+    Serial.println("something went wrong trying to display data");
+    return;
+  }
 }
