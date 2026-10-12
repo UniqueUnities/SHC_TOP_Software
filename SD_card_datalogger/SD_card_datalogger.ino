@@ -98,16 +98,43 @@ void loop() {
   }*/
 
   //convert loop above to code below when the bmp/bno/gps programs join with this one
-  /*dataString += data1;
+  /*dataString += time;
   dataString += ",";
 
-  dataString += data2;
+  dataString += longitude;
   dataString += ",";
 
-  dataString += data3;
-  dataString += ",";*/
+  dataString += latitude;
+  dataString += ",";
 
-  //repeat for however many pieces of data being stored
+  dataString += altitude;
+  dataString += ",";
+
+  dataString += pressure;
+  dataString += ",";
+
+  dataString += temperature;
+  dataString += ",";
+
+  dataString += roll;
+  dataString += ",";
+
+  dataString += pitch;
+  dataString += ",";
+
+  dataString += yaw;
+  dataString += ",";
+
+  dataString += Ax;
+  dataString += ",";
+
+  dataString += Ay;
+  dataString += ",";
+
+  dataString += Az;
+  dataString += ",";
+
+  dataString += speed;*/
 
   // open the file. note that only one file can be open at a time,
   // so you have to close this one before opening another.

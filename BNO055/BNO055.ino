@@ -28,7 +28,7 @@
 */
 
 #define SDA 4
-#define SLC 5
+#define SCL 5
 
 /* Set the delay between fresh samples */
 uint16_t BNO055_SAMPLERATE_DELAY_MS = 100;
@@ -63,12 +63,12 @@ void loop(void)
 {
   //could add VECTOR_ACCELEROMETER, VECTOR_MAGNETOMETER,VECTOR_GRAVITY...
   //sensors_event_t orientationData , angVelocityData , linearAccelData, magnetometerData, accelerometerData, gravityData;
-  sensors_event_t orientationData, magnetometerData;
+  sensors_event_t orientationData, linearAccelData;
 
   bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
   //bno.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
-  //bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
-  bno.getEvent(&magnetometerData, Adafruit_BNO055::VECTOR_MAGNETOMETER);
+  bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
+  //bno.getEvent(&magnetometerData, Adafruit_BNO055::VECTOR_MAGNETOMETER);
   //bno.getEvent(&accelerometerData, Adafruit_BNO055::VECTOR_ACCELEROMETER);
   //bno.getEvent(&gravityData, Adafruit_BNO055::VECTOR_GRAVITY);
 
@@ -77,8 +77,8 @@ void loop(void)
 
   printEvent(&orientationData);
   //printEvent(&angVelocityData);
-  //printEvent(&linearAccelData);
-  printEvent(&magnetometerData);
+  printEvent(&linearAccelData);
+  //printEvent(&magnetometerData);
   //printEvent(&accelerometerData);
   //printEvent(&gravityData);
 
@@ -117,13 +117,13 @@ void printEvent(sensors_event_t* event) {
     y = event->orientation.y; //roll
     z = event->orientation.z; //pitch
   }
-  else if (event->type == SENSOR_TYPE_MAGNETIC_FIELD) {
+  /*else if (event->type == SENSOR_TYPE_MAGNETIC_FIELD) {
     Serial.print("Mag:");
     x = event->magnetic.x;
     y = event->magnetic.y;
     z = event->magnetic.z;
   }
-  /*else if (event->type == SENSOR_TYPE_GYROSCOPE) {
+  else if (event->type == SENSOR_TYPE_GYROSCOPE) {
     Serial.print("Gyro:");
     x = event->gyro.x;
     y = event->gyro.y;
@@ -134,13 +134,13 @@ void printEvent(sensors_event_t* event) {
     x = event->gyro.x;
     y = event->gyro.y;
     z = event->gyro.z;
-  }
+  }*/
   else if (event->type == SENSOR_TYPE_LINEAR_ACCELERATION) {
     Serial.print("Linear:");
-    x = event->acceleration.x;
-    y = event->acceleration.y;
-    z = event->acceleration.z;
-  }
+    x = event->acceleration.x; //Ax
+    y = event->acceleration.y; //Ay
+    z = event->acceleration.z; //Az
+  }/*
   else if (event->type == SENSOR_TYPE_GRAVITY) {
     Serial.print("Gravity:");
     x = event->acceleration.x;
@@ -160,12 +160,19 @@ void printEvent(sensors_event_t* event) {
     Serial.print(" |\tpitch= ");
     Serial.println(z);
   }
-  Serial.print("\tx= ");
-  Serial.print(x);
-  Serial.print(" |\ty= ");
-  Serial.print(y);
-  Serial.print(" |\tz= ");
-  Serial.println(z);
+  else if(event->type == SENSOR_TYPE_ORIENTATION)
+  {
+    Serial.print("\tAx= ");
+    Serial.print(x);
+    Serial.print(" |\tAy= ");
+    Serial.print(y);
+    Serial.print(" |\tAz= ");
+    Serial.println(z);
+  }
+  else
+  {
+    Serial.print("Something went wrong when displaying data.")
+  }
 }
 
 

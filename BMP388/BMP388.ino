@@ -29,7 +29,7 @@
 */
 
 #define SDA 4
-#define SLC 5
+#define SCL 5
 
 #define SEALEVELPRESSURE_HPA (1013.25)
 

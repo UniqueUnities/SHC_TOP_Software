@@ -70,7 +70,7 @@ SFE_UBLOX_GNSS myGNSS;
 long lastTime = 0; //Simple local timer. Limits amount of SPI traffic to u-blox module.
 
 #define SDA 4
-#define SLC 5
+#define SCL 5
 
 void setup()
 {
@@ -126,6 +126,11 @@ void loop()
     Serial.print(F(" Alt: "));
     Serial.print(altitude);
     Serial.print(F(" (mm)"));
+
+    long speed_mms = myGNSS.getGroundSpeed(); 
+    Serial.print(F(" Speed: "));
+    Serial.print(speed_mms);
+    Serial.print(F(" (mm/s)"));
 
     byte SIV = myGNSS.getSIV();
     Serial.print(F(" SIV: "));

@@ -38,6 +38,44 @@ void loop() {
   //send to ground station
   digitalWrite(LED_BUILTIN, state);
 
+  /*dataString += time;
+  dataString += ",";
+
+  dataString += longitude;
+  dataString += ",";
+
+  dataString += latitude;
+  dataString += ",";
+
+  dataString += altitude;
+  dataString += ",";
+
+  dataString += pressure;
+  dataString += ",";
+
+  dataString += temperature;
+  dataString += ",";
+
+  dataString += roll;
+  dataString += ",";
+
+  dataString += pitch;
+  dataString += ",";
+
+  dataString += yaw;
+  dataString += ",";
+
+  dataString += Ax;
+  dataString += ",";
+
+  dataString += Ay;
+  dataString += ",";
+
+  dataString += Az;
+  dataString += ",";
+
+  dataString += speed;*/
+
   HC12.println("test123");
   Serial.println("sent: test123");
   delay(1000);
