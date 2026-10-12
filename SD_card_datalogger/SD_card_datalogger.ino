@@ -86,7 +86,7 @@ void setup() {
 
 void loop() {
   // make a string for assembling the data to log:
-  String dataString = "hello";
+  String dataString = "";
 
   // read three sensors and append to the string:
   /*for (int analogPin = 0; analogPin < 3; analogPin++) {

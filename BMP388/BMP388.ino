@@ -74,9 +74,9 @@ void loop() {
   Serial.print(bmp.pressure / 100.0);
   Serial.println(" hPa");
 
-  Serial.print("Approx. Altitude = ");
+  /*Serial.print("Approx. Altitude = ");
   Serial.print(bmp.readAltitude(SEALEVELPRESSURE_HPA));
-  Serial.println(" m");
+  Serial.println(" m");*/
 
   Serial.println();
   delay(2000); //have delay(100); at the end to run loop at a rate of 10hz

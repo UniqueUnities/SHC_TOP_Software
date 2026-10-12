@@ -82,7 +82,7 @@ void loop(void)
   //printEvent(&accelerometerData);
   //printEvent(&gravityData);
 
-  int8_t boardTemp = bno.getTemp();
+  /*int8_t boardTemp = bno.getTemp();
   Serial.println();
   Serial.print(F("board temperature: "));
   Serial.println(boardTemp);
@@ -100,7 +100,7 @@ void loop(void)
   Serial.println(mag);
 
   Serial.println("--");
-  delay(BNO055_SAMPLERATE_DELAY_MS);
+  delay(BNO055_SAMPLERATE_DELAY_MS);*/
 }
 
 void printEvent(sensors_event_t* event) {
