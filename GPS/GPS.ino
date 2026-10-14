@@ -142,7 +142,7 @@ void loop()
     Serial.print(speedKmh);
     Serial.print(F(" (km/h)"));
 
-    byte SIV = myGNSS.getSIV();
+    //byte SIV = myGNSS.getSIV();
     Serial.print(F(" SIV: "));
     Serial.print(SIV);
 
