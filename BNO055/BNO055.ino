@@ -75,9 +75,30 @@ void loop(void)
   Serial.print("Current time: ");
   Serial.println(millis());
 
-  printEvent(&orientationData);
+  if (orientationData.type == SENSOR_TYPE_ORIENTATION) {
+    Serial.print("Orient:");
+    double yaw   = orientationData.orientation.x; 
+    double roll  = orientationData.orientation.y; 
+    double pitch = orientationData.orientation.z; 
+
+    Serial.print("\tyaw= ");   Serial.print(yaw);
+    Serial.print(" |\troll= ");  Serial.print(roll);
+    Serial.print(" |\tpitch= "); Serial.println(pitch);
+  } 
+
+  if (linearAccelData.type == SENSOR_TYPE_LINEAR_ACCELERATION) {
+    Serial.print("Linear:");
+    double ax = linearAccelData.acceleration.x;
+    double ay = linearAccelData.acceleration.y;
+    double az = linearAccelData.acceleration.z;
+
+    Serial.print("\tAx= ");   Serial.print(ax);
+    Serial.print(" |\tAy= ");  Serial.print(ay);
+    Serial.print(" |\tAz= ");  Serial.println(az);
+  }
+  //printEvent(&orientationData);
   //printEvent(&angVelocityData);
-  printEvent(&linearAccelData);
+  //printEvent(&linearAccelData);
   //printEvent(&magnetometerData);
   //printEvent(&accelerometerData);
   //printEvent(&gravityData);
@@ -171,7 +192,7 @@ void printEvent(sensors_event_t* event) {
   }
   else
   {
-    Serial.print("Something went wrong when displaying data.")
+    Serial.print("Something went wrong when displaying data.");
   }
 }
 

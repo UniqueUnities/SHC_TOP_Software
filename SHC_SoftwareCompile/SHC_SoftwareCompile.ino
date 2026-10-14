@@ -43,7 +43,7 @@
     #define BMP_CS 10
     Instantiate Instance of SPI Class: #define spiPort SPI //Standard SPI Port*/
   SFE_UBLOX_GNSS myGNSS;
-  Adafruit_BMP388 bmp;
+  Adafruit_BMP3XX bmp;
   Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28, &Wire); //Check I2C Device Address
 
 //NoteVoltage.h (Voltage -> Notes):
@@ -86,18 +86,18 @@
   #define NOTE_B5  987.767
 
 //Aircraft States:
-  enum piracyStates {
+  /*enum piracyStates {
     PIRATE = 0;
     STANDBY;
     LAUNCH;
     FLIGHT;
     LANDED;
     CAPTAIN;
-  }
+  }*/
 
 //Global Variables (REVIEW: Ensure Descriptive Names & Implement Comments):
-  enum piracyStates State = PIRATE;
-  const int SEALEVELPRESSURE_HPA 1013.25  //REVIEW: Can This Be A Const Float?
+  //enum piracyStates State = PIRATE;
+  //const int SEALEVELPRESSURE_HPA 1013.25  //REVIEW: Can This Be A Const Float?
   int groundLevel = 0;  //REVIEW: Set Ground Level
   const int msPullRate = 100; //Time Between Sensor Data Pulls
   int msLastPull = 0; //Sensor Data Pulls
@@ -128,7 +128,7 @@
 void printEvent(sensors_event_t* event);
 
 void setup() {
-  piracyStates STATE = STANDBY;
+  //piracyStates STATE = STANDBY;
   //Wait For Serial Monitor Availability (REVIEW: Is This Needed?):
     Serial.println(F("{DEBUG - SETUP TEST: Testing Serial Monitor Availability...}"));
     while(!Serial) { //Wait For Serial Port To Open In Terminal; Needed For Native USB Port Only
@@ -216,22 +216,47 @@ void setup() {
     Serial.println(F("{DEBUG - SETUP SUCCESS: SD Card Initialization Successful! :>}"));
     Serial.println(F("{DEBUG - SETUP TEST: Initializing HC12 Serial Link...}"));
     HC12.begin(9600);
-    if(!HC12.isListening()) {
+    /*if(!HC12.isListening()) {
       Serial.println(F("{DEBUG - SETUP ERROR: HC12 Serial Link Uninitialized. :<}"));
     }
     else {
       Serial.println(F("{DEBUG - SETUP SUCCESS: HC12 Serial Link Initialized! :>}"));
-  }
+  }*/
   Serial.println(F("{DEBUG - SETUP SUCCESS: All Tests Complete; Control Passed To System Loop!! :D}"));
+  
+  String dataString = "Time,Longitude,Latitude,Altitude,Pressure,Temperature,Roll,Pitch,Yaw,Ax,Ay,Az,Speed";
+  File dataFile = SD.open("datalog.csv", FILE_WRITE);
+  if(dataFile) { //If File Is Available, Write To It
+      msLastWrite = millis();
+      dataFile.println(dataString);
+      dataFile.close();
+      Serial.println(dataString); //Print To Serial Port
+      Serial.println("{DEBUG - SETUP SUCCESS: Data Successfully Written! :>}");
+    }
+    else { //If File Is Not Open, Show Error
+      Serial.println("{DEBUG - LOOP ERROR: Error Opening datalog.txt. :<}");
+    }
 }
 
 void loop() {
+  double decimalLat=0;
+  double decimalLong=0;
+  double alt=0;
+  double pressure=0;
+  double temp=0;
+  double roll=0;
+  double pitch=0;
+  double yaw=0;
+  double Ax=0;
+  double Ay=0;
+  double Az=0;
+  double speed=0;
   //Loop-Related Variables:
     //int msLoopBegin = millis();
     //int msLoop = -1;
   //Blink LED:
     //Serial.println("{DEBUG - LOOP CALC: Time Since Last Blink " + String(millis()-msLastBlink) + "ms}");
-    if(millis() - msLastBlink >= msBlinkRate {
+    if(millis() - msLastBlink >= msBlinkRate) {
       Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastBlink) + "ms >= " + String(msBlinkRate) + "ms.");
       msLastBlink = millis();    
       if(stateLED = LOW) {
@@ -242,7 +267,7 @@ void loop() {
         stateLED = LOW;
         Serial.println("; Switching LED State (On -> Off)}");
       }
-      digitalWrite(LED_WHITE, stateLED)
+      digitalWrite(LED_WHITE, stateLED);
     }
   
   //REVIEW: Implement When Sand Deposit Switch Flipped
@@ -261,7 +286,7 @@ void loop() {
         }
       }
 
-  switch(STATE) { //State Machine
+  /*switch(STATE) { //State Machine
     case 0: //PIRATE
       //REVIEW: Create Way To Determine State If Default Reached
       break;
@@ -300,7 +325,7 @@ void loop() {
       break;
     default:
 
-  }
+  }*/
   
   //Output Sensor Data (REVIEW: Implement Data Analysis):
     //Serial.println("{DEBUG - LOOP CALC: Time Since Last Sensor Data Pull " + String(millis()-msLastPull) + "ms.}");
@@ -309,20 +334,41 @@ void loop() {
       Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastPull) + "ms >= " + String(msPullRate) + "ms; Pulling BMP388 & BNO055 Sensor Data...}");
       if(!bmp.performReading()) { //Review (Test): Implement System To Redo Reading If Error
         Serial.println(F("{DEBUG - LOOP ERROR: BMP388 Failed To Perform Reading. :<}"));
-        continue;
+        //continue;
       }
       msLastPull = millis();
       Serial.println(F("{DEBUG - LOOP SUCCESS: BMP388 Successfully Read; Now Outputting Data:}"));
+      temp = bmp.temperature;
       Serial.println("Temperature: " + String(bmp.temperature) + "*C");
+      pressure = bmp.pressure / 100.0;
       Serial.println("Pressure: " + String(bmp.pressure / 100.0) + "hPa");
       //Serial.print("Approx. Altitude: " + String(bmp.readAltitude(SEALEVELPRESSURE_HPA)) + "m");
       Serial.println(F("{DEBUG - LOOP READING: BMP388 Read, Now Reading From BNO055...}"));
       //REVIEW: Implement Way To Verify Errorless Data Pull?
       sensors_event_t orientationData, linearAccelData; //Additional Data Points: angVelocityData, accelerometerData, gravityData, magnetometerData
       bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
-      printEvent(&orientationData); //REVIEW: Is It Possible To Combine These Two Lines?
       bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
-      printEvent(&linearAccelData);  //REVIEW: Is It Possible To Combine These Two Lines?
+      if (orientationData.type == SENSOR_TYPE_ORIENTATION) {
+        Serial.print("Orient:");
+        double yaw   = orientationData.orientation.x; 
+        double roll  = orientationData.orientation.y; 
+        double pitch = orientationData.orientation.z; 
+
+        Serial.print("\tyaw= ");   Serial.print(yaw);
+        Serial.print(" |\troll= ");  Serial.print(roll);
+        Serial.print(" |\tpitch= "); Serial.println(pitch);
+      } 
+
+      if (linearAccelData.type == SENSOR_TYPE_LINEAR_ACCELERATION) {
+        Serial.print("Linear:");
+        double Ax = linearAccelData.acceleration.x;
+        double Ay = linearAccelData.acceleration.y;
+        double Az = linearAccelData.acceleration.z;
+
+        Serial.print("\tAx= ");   Serial.print(Ax);
+        Serial.print(" |\tAy= ");  Serial.print(Ay);
+        Serial.print(" |\tAz= ");  Serial.println(Az);
+      }
       /*Additional Data Points (REVIEW: Either Include Or Remove):
         bno.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
         bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
@@ -354,13 +400,13 @@ void loop() {
       double decimalLat = rawLat / 10000000.0;
       double decimalLong = rawLong / 10000000.0;
 
-      double altitudeMeters = myGNSS.getAltitude() / 1000.0; // Converts mm to Meters
-      double speedKmh = (myGNSS.getGroundSpeed() / 1000.0) * 3.6; // Converts mm/s to km/h
+      double alt = myGNSS.getAltitude() / 1000.0; // Converts mm to Meters
+      double speed = (myGNSS.getGroundSpeed() / 1000.0) * 3.6; // Converts mm/s to km/h
       byte SIV = myGNSS.getSIV();
       Serial.println("Lat: " + String(decimalLat,7));
       Serial.println("Long: " + String(decimalLong,7));
-      Serial.println("Alt: " + String(altitudeMeters) + "m");
-      Serial.println("Speed: " + String(speedKmh) + "(km/h)");
+      Serial.println("Alt: " + String(alt) + "m");
+      Serial.println("Speed: " + String(speed) + "(km/h)");
       Serial.println("SIV: " + String(SIV));
     }
     Serial.println(F("{DEBUG - LOOP SUCCESS: All Sensor Data Successfully Read! :>}"));
@@ -377,22 +423,22 @@ void loop() {
           dataString += ",";
         }
       }*/
-    /*dataString += time;
+    dataString += millis();
     dataString += ",";
 
-    dataString += longitude;
+    dataString += decimalLong;
     dataString += ",";
 
-    dataString += latitude;
+    dataString += decimalLat;
     dataString += ",";
 
-    dataString += altitude;
+    dataString += alt;
     dataString += ",";
 
     dataString += pressure;
     dataString += ",";
 
-    dataString += temperature;
+    dataString += temp;
     dataString += ",";
 
     dataString += roll;
@@ -413,7 +459,7 @@ void loop() {
     dataString += Az;
     dataString += ",";
 
-    dataString += speed;*/
+    dataString += speed;
     //dataString += (data1 + ", " + data2 + ", " data3; //Convert Loop Above To Coe Below When Sensor Programs Join With This One (They Now Have!) | Repeat For All Data Stored
     Serial.println("{DEBUG - LOOP CHANGE: Data Compiled; Now Writing In SD Card...}");
     File dataFile = SD.open("datalog.csv", FILE_WRITE); //Open File (Only One File Can Open At A Time)
@@ -427,7 +473,7 @@ void loop() {
     else { //If File Is Not Open, Show Error
       Serial.println("{DEBUG - LOOP ERROR: Error Opening datalog.txt. :<}");
     }
-
+  }
   //HC12 Radio Transmission (REVIEW: Implement Past Test):
     if(millis() - msLastRadio >= msRadioRate) {
       digitalWrite(LED_BUILTIN, state); //REVIEW: What Is The Purpose Of This Line?
@@ -481,6 +527,7 @@ void loop() {
             Serial.print(char(HC12.read()));
           }
         }*/
+    }
 
   /*Delay For Loop Cycles: Removed As A Better Solution Exists (If Statements)
     msLoop = millis()-msLoopBegin();
@@ -488,15 +535,15 @@ void loop() {
     Serial.println();
     delay(msRate-msLoop)); //Keep Rate of 10hz*/
 }
-
 //Printing Values (REVIEW: Thorough Testing):
+/*
 void printEvent(sensors_event_t* event) {
   double x = -1000000, y = -1000000 , z = -1000000; //Error-Checking Values
   if (event->type == SENSOR_TYPE_ORIENTATION) {
     Serial.print("Orient:");
-    x = event->orientation.x; //yaw
-    y = event->orientation.y; //roll
-    z = event->orientation.z; //pitch
+    yaw = event->orientation.x; //yaw
+    roll = event->orientation.y; //roll
+    pitch = event->orientation.z; //pitch
     Serial.print("\tyaw= ");
     Serial.print(x);
     Serial.print(" |\troll= ");
@@ -506,9 +553,9 @@ void printEvent(sensors_event_t* event) {
   }
   else if (event->type == SENSOR_TYPE_LINEAR_ACCELERATION) {
     Serial.print("Linear:");
-    x = event->acceleration.x;
-    y = event->acceleration.y;
-    z = event->acceleration.z;
+    ax = event->acceleration.x;
+    ay = event->acceleration.y;
+    az = event->acceleration.z;
     Serial.print("\tAx= ");
     Serial.print(x);
     Serial.print(" |\tAy= ");
@@ -516,43 +563,43 @@ void printEvent(sensors_event_t* event) {
     Serial.print(" |\tAz= ");
     Serial.println(z);
   }
-  /*Accelerometer (REVIEW: Commented; Do We Plan On Exlcuding?):
+  Accelerometer (REVIEW: Commented; Do We Plan On Exlcuding?):
     if(event->type == SENSOR_TYPE_ACCELEROMETER) {
       Serial.print("Accl:");
       x = event->acceleration.x;
       y = event->acceleration.y;
       z = event->acceleration.z;
-    }*/
-  /*Gyroscope (REVIEW: Commented; Do We Plan On Exlcuding?):
+    }
+  Gyroscope (REVIEW: Commented; Do We Plan On Exlcuding?):
     else if (event->type == SENSOR_TYPE_GYROSCOPE) {
       Serial.print("Gyro:");
       x = event->gyro.x;
       y = event->gyro.y;
       z = event->gyro.z;
-    }*/
+    }
   /*Rotation Vector (REVIEW: Commented; Do We Plan On Exlcuding?):
     else if (event->type == SENSOR_TYPE_ROTATION_VECTOR) {
       Serial.print("Rot:");
       x = event->gyro.x;
       y = event->gyro.y;
       z = event->gyro.z;
-    }*/
-  /*Linear Acceleration (REVIEW: Commented; Do We Plan On Exlcuding?):
+    }
+  Linear Acceleration (REVIEW: Commented; Do We Plan On Exlcuding?):
     else if (event->type == SENSOR_TYPE_MAGNETIC_FIELD) {
     Serial.print("Mag:");
     x = event->magnetic.x;
     y = event->magnetic.y;
     z = event->magnetic.z;
-    }*/
-  /*Gravity (REVIEW: Commented; Do We Plan On Exlcuding?):
+    }
+  Gravity (REVIEW: Commented; Do We Plan On Exlcuding?):
     else if (event->type == SENSOR_TYPE_GRAVITY) {
       Serial.print("Gravity:");
       x = event->acceleration.x;
       y = event->acceleration.y;
       z = event->acceleration.z;
-    }*/
+    }
   else {
     Serial.println("something went wrong trying to display data");
     return;
   }
-}
+}*/
