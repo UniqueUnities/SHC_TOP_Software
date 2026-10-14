@@ -113,24 +113,34 @@ void loop()
     Serial.print("Current time: ");
     Serial.println(millis());
 
-    long latitude = myGNSS.getLatitude();
+    //fetch raw scaling factors (Degrees * 10^-7)
+    long rawLat = myGNSS.getLatitude();
+    long rawLong = myGNSS.getLongitude();
+    //convert to full 64-bit floating-point decimal degrees
+    double decimalLat = rawLat / 10000000.0;
+    double decimalLong = rawLong / 10000000.0;
+
+    double altitudeMeters = myGNSS.getAltitude() / 1000.0; // Converts mm to Meters
+    double speedKmh = (myGNSS.getGroundSpeed() / 1000.0) * 3.6; // Converts mm/s to km/h
+    byte SIV = myGNSS.getSIV();
+
+    //long latitude = myGNSS.getLatitude();
     Serial.print(F("Lat: "));
-    Serial.print(latitude);
+    Serial.print(decimalLat,7);
 
-    long longitude = myGNSS.getLongitude();
+    //long longitude = myGNSS.getLongitude();
     Serial.print(F(" Long: "));
-    Serial.print(longitude);
-    Serial.print(F(" (degrees * 10^-7)"));
+    Serial.print(decimalLong,7);
 
-    long altitude = myGNSS.getAltitude();
+    //long altitude = myGNSS.getAltitude();
     Serial.print(F(" Alt: "));
-    Serial.print(altitude);
+    Serial.print(altitudeMeters);
     Serial.print(F(" (mm)"));
 
-    long speed_mms = myGNSS.getGroundSpeed(); 
+    //long speed_mms = myGNSS.getGroundSpeed(); 
     Serial.print(F(" Speed: "));
-    Serial.print(speed_mms);
-    Serial.print(F(" (mm/s)"));
+    Serial.print(speedKmh);
+    Serial.print(F(" (km/h)"));
 
     byte SIV = myGNSS.getSIV();
     Serial.print(F(" SIV: "));
