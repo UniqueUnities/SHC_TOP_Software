@@ -347,15 +347,20 @@ void loop() {
       Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastGNSSPull) + "ms >= " + String(msGNSSPullRate) + "ms; Pulling Data...}");
       //REVIEW: Implement System To Check For Reading Errors
       msLastGNSSPull = millis();
-      long latitude = myGNSS.getLatitude();
-      long longitude = myGNSS.getLongitude();
-      long altitude = myGNSS.getAltitude();
-      long speed_mms = myGNSS.getGroundSpeed(); 
+      //fetch raw scaling factors (Degrees * 10^-7)
+      long rawLat = myGNSS.getLatitude();
+      long rawLong = myGNSS.getLongitude();
+      //convert to full 64-bit floating-point decimal degrees
+      double decimalLat = rawLat / 10000000.0;
+      double decimalLong = rawLong / 10000000.0;
+
+      double altitudeMeters = myGNSS.getAltitude() / 1000.0; // Converts mm to Meters
+      double speedKmh = (myGNSS.getGroundSpeed() / 1000.0) * 3.6; // Converts mm/s to km/h
       byte SIV = myGNSS.getSIV();
-      Serial.println("Lat: " + String(latitude) + " (degrees * 10^-7)");
-      Serial.println("Long: " + String(longitude) + " (degrees * 10^-7)");
-      Serial.println("Alt: " + String(altitude) + "nm");
-      Serial.println("Speed: " + String(speed_mms) + "(mm/s)");
+      Serial.println("Lat: " + String(decimalLat,7));
+      Serial.println("Long: " + String(decimalLong,7));
+      Serial.println("Alt: " + String(altitudeMeters) + "m");
+      Serial.println("Speed: " + String(speedKmh) + "(km/h)");
       Serial.println("SIV: " + String(SIV));
     }
     Serial.println(F("{DEBUG - LOOP SUCCESS: All Sensor Data Successfully Read! :>}"));
