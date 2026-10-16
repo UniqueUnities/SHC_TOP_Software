@@ -96,18 +96,23 @@
   #include <SD.h>
 
 //Aircraft States:
-  enum piracyStates {
+  /*enum piracyStates {
     PIRATE = 0;
     STANDBY;
     LAUNCH;
     FLIGHT;
     LANDED;
     CAPTAIN;
-  }
+  }*/
 
 //Global Variables (REVIEW: Ensure Descriptive Names & Implement Comments):
+<<<<<<< HEAD:SHC_SoftwareCompile.ino
   enum piracyStates State = PIRATE;
   #define SEALEVELPRESSURE_HPA 1013.25  //REVIEW: Can This Be A Const Float?
+=======
+  //enum piracyStates State = PIRATE;
+  //const int SEALEVELPRESSURE_HPA 1013.25  //REVIEW: Can This Be A Const Float?
+>>>>>>> e33602288163a0a26b97b9ba4ec439bf34f54a3d:SHC_SoftwareCompile/SHC_SoftwareCompile.ino
   int groundLevel = 0;  //REVIEW: Set Ground Level
   const int levelError = 5; //REVIEW: Error Requires Improved Estimate
   const int msPullRate = 100; //Time Between Sensor Data Pulls
@@ -151,6 +156,7 @@
 
 void printEvent(sensors_event_t* event);
 
+<<<<<<< HEAD:SHC_SoftwareCompile.ino
 void availSerial() //Wait For Serial Monitor Availability (REVIEW: Is This Needed?):
 {
   Serial.println(F("{DEBUG - SETUP TEST: Testing Serial Monitor Availability...}"));
@@ -160,6 +166,17 @@ void availSerial() //Wait For Serial Monitor Availability (REVIEW: Is This Neede
   }
   Serial.println(F("{DEBUG - SETUP Success: Serial Monitor Available! :>}"));
 }
+=======
+void setup() {
+  //piracyStates STATE = STANDBY;
+  //Wait For Serial Monitor Availability (REVIEW: Is This Needed?):
+    Serial.println(F("{DEBUG - SETUP TEST: Testing Serial Monitor Availability...}"));
+    while(!Serial) { //Wait For Serial Port To Open In Terminal; Needed For Native USB Port Only
+      Serial.println(F("{DEBUG - SETUP ERROR: Serial Monitor Not Yet Available; Testing Again. :<)}"));
+      delay(10);
+    }
+    Serial.println(F("{DEBUG - SETUP Success: Serial Monitor Available! :>}"));
+>>>>>>> e33602288163a0a26b97b9ba4ec439bf34f54a3d:SHC_SoftwareCompile/SHC_SoftwareCompile.ino
 
 void initPinModes() //Initialize Pin Modes
 {
@@ -250,6 +267,7 @@ void initSD() //Initialize SD Card
         Serial.println("{DEBUG - SETUP ERROR: Card Failed Or Not Present. :<}");
         return; //End Set-Up; Nothing Can Be Stored | REVIEW: Should We Implement A Loop To Ensure Proper Set-Up?
       }*/
+<<<<<<< HEAD:SHC_SoftwareCompile.ino
     Serial.println(F("{DEBUG - SETUP SUCCESS: SD Card Initialization Successful! :>}"));  
 }
 
@@ -437,6 +455,19 @@ void setup() {
   initHC12();
   Serial.println(F("{DEBUG - SETUP SUCCESS: All Tests Complete; Control Passed To System Loop!! :D}"));
 
+=======
+    Serial.println(F("{DEBUG - SETUP SUCCESS: SD Card Initialization Successful! :>}"));
+    Serial.println(F("{DEBUG - SETUP TEST: Initializing HC12 Serial Link...}"));
+    HC12.begin(9600);
+    /*if(!HC12.isListening()) {
+      Serial.println(F("{DEBUG - SETUP ERROR: HC12 Serial Link Uninitialized. :<}"));
+    }
+    else {
+      Serial.println(F("{DEBUG - SETUP SUCCESS: HC12 Serial Link Initialized! :>}"));
+  }*/
+  Serial.println(F("{DEBUG - SETUP SUCCESS: All Tests Complete; Control Passed To System Loop!! :D}"));
+  
+>>>>>>> e33602288163a0a26b97b9ba4ec439bf34f54a3d:SHC_SoftwareCompile/SHC_SoftwareCompile.ino
   String dataString = "Time,Longitude,Latitude,Altitude,Pressure,Temperature,Roll,Pitch,Yaw,Ax,Ay,Az,Speed";
   File dataFile = SD.open("datalog.csv", FILE_WRITE);
   if(dataFile) { //If File Is Available, Write To It
@@ -446,18 +477,55 @@ void setup() {
       Serial.println(dataString); //Print To Serial Port
       Serial.println("{DEBUG - SETUP SUCCESS: Data Successfully Written! :>}");
     }
+<<<<<<< HEAD:SHC_SoftwareCompile.ino
   else { //If File Is Not Open, Show Error
     Serial.println("{DEBUG - LOOP ERROR: Error Opening datalog.txt. :<}");
   }
 }
 
 void loop() {
+=======
+    else { //If File Is Not Open, Show Error
+      Serial.println("{DEBUG - LOOP ERROR: Error Opening datalog.txt. :<}");
+    }
+}
+
+void loop() {
+  double decimalLat=0;
+  double decimalLong=0;
+  double alt=0;
+  double pressure=0;
+  double temp=0;
+  double roll=0;
+  double pitch=0;
+  double yaw=0;
+  double Ax=0;
+  double Ay=0;
+  double Az=0;
+  double speed=0;
+  //Loop-Related Variables:
+    //int msLoopBegin = millis();
+    //int msLoop = -1;
+>>>>>>> e33602288163a0a26b97b9ba4ec439bf34f54a3d:SHC_SoftwareCompile/SHC_SoftwareCompile.ino
   //Blink LED:
     //Serial.println("{DEBUG - LOOP CALC: Time Since Last Blink " + String(millis()-msLastBlink) + "ms}");
-    if(millis() - msLastBlink >= msBlinkRate {
+    if(millis() - msLastBlink >= msBlinkRate) {
       Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastBlink) + "ms >= " + String(msBlinkRate) + "ms.");
+<<<<<<< HEAD:SHC_SoftwareCompile.ino
       msLastBlink = millis();
       blinkLED();
+=======
+      msLastBlink = millis();    
+      if(stateLED = LOW) {
+        stateLED = HIGH;
+        Serial.println("; Switching LED State (Off -> On)}");
+      }
+      else {
+        stateLED = LOW;
+        Serial.println("; Switching LED State (On -> Off)}");
+      }
+      digitalWrite(LED_WHITE, stateLED);
+>>>>>>> e33602288163a0a26b97b9ba4ec439bf34f54a3d:SHC_SoftwareCompile/SHC_SoftwareCompile.ino
     }
   //REVIEW: Implement When Sand Deposit Switch Flipped
     //Buzzer Melody:
@@ -475,7 +543,7 @@ void loop() {
         }
       }
 
-  switch(STATE) { //State Machine
+  /*switch(STATE) { //State Machine
     case 0: //PIRATE
       if((altitude >= groundLevel - levelError && altitude <= groundLevel + levelError) && !itFlew)
         STATE = LAUNCH;
@@ -517,16 +585,101 @@ void loop() {
           //Generate Data Plots As Function of Time
       break;
     default:
+<<<<<<< HEAD:SHC_SoftwareCompile.ino
   }
+=======
+
+  }*/
+>>>>>>> e33602288163a0a26b97b9ba4ec439bf34f54a3d:SHC_SoftwareCompile/SHC_SoftwareCompile.ino
   
   //Output Sensor Data (REVIEW: Implement Data Analysis):
     //Serial.println("{DEBUG - LOOP CALC: Time Since Last Sensor Data Pull " + String(millis()-msLastPull) + "ms.}");
     if(millis() - msLastPull >= msPullRate) {
       Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastPull) + "ms >= " + String(msPullRate) + "ms; Pulling BMP388 & BNO055 Sensor Data...}");
+<<<<<<< HEAD:SHC_SoftwareCompile.ino
       if(!readSensors())
         continue;
+=======
+      if(!bmp.performReading()) { //Review (Test): Implement System To Redo Reading If Error
+        Serial.println(F("{DEBUG - LOOP ERROR: BMP388 Failed To Perform Reading. :<}"));
+        //continue;
+      }
+      msLastPull = millis();
+      Serial.println(F("{DEBUG - LOOP SUCCESS: BMP388 Successfully Read; Now Outputting Data:}"));
+      temp = bmp.temperature;
+      Serial.println("Temperature: " + String(bmp.temperature) + "*C");
+      pressure = bmp.pressure / 100.0;
+      Serial.println("Pressure: " + String(bmp.pressure / 100.0) + "hPa");
+      //Serial.print("Approx. Altitude: " + String(bmp.readAltitude(SEALEVELPRESSURE_HPA)) + "m");
+      Serial.println(F("{DEBUG - LOOP READING: BMP388 Read, Now Reading From BNO055...}"));
+      //REVIEW: Implement Way To Verify Errorless Data Pull?
+      sensors_event_t orientationData, linearAccelData; //Additional Data Points: angVelocityData, accelerometerData, gravityData, magnetometerData
+      bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
+      bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
+      if (orientationData.type == SENSOR_TYPE_ORIENTATION) {
+        Serial.print("Orient:");
+        double yaw   = orientationData.orientation.x; 
+        double roll  = orientationData.orientation.y; 
+        double pitch = orientationData.orientation.z; 
+
+        Serial.print("\tyaw= ");   Serial.print(yaw);
+        Serial.print(" |\troll= ");  Serial.print(roll);
+        Serial.print(" |\tpitch= "); Serial.println(pitch);
+      } 
+
+      if (linearAccelData.type == SENSOR_TYPE_LINEAR_ACCELERATION) {
+        Serial.print("Linear:");
+        double Ax = linearAccelData.acceleration.x;
+        double Ay = linearAccelData.acceleration.y;
+        double Az = linearAccelData.acceleration.z;
+
+        Serial.print("\tAx= ");   Serial.print(Ax);
+        Serial.print(" |\tAy= ");  Serial.print(Ay);
+        Serial.print(" |\tAz= ");  Serial.println(Az);
+      }
+      /*Additional Data Points (REVIEW: Either Include Or Remove):
+        bno.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
+        bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
+        bno.getEvent(&accelerometerData, Adafruit_BNO055::VECTOR_ACCELEROMETER);
+        bno.getEvent(&magnetometerData, Adafruit_BNO055::VECTOR_MAGNETOMETER);
+        bno.getEvent(&gravityData, Adafruit_BNO055::VECTOR_GRAVITY);*/
+
+
+      /*int8_t boardTemp = bno.getTemp();
+      Serial.println("\nBoard Temperature: " + String(boardTemp));
+      Serial.println(F("{DEBUG - LOOP READING: Reading BNO055 Calibration Data:}"));
+      uint8_t system, gyro, accel, mag = 0;
+      bno.getCalibration(&system, &gyro, &accel, &mag);
+      Serial.println("Calibration:");
+      Serial.println("Sys = " + String(system));
+      Serial.println("Gyro = " + String(gyro));
+      Serial.println("Accel = " + String(accel));
+      Serial.println("Mag = " + String(mag));*/
+    }   
+    //Serial.println("{DEBUG - LOOP CALC: Time Since Last GNSS Data Pull " + String(millis()-msLastGNSSPull) + "ms}");
+    if(millis() - msLastGNSSPull >= msGNSSPullRate) {
+      Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastGNSSPull) + "ms >= " + String(msGNSSPullRate) + "ms; Pulling Data...}");
+      //REVIEW: Implement System To Check For Reading Errors
+      msLastGNSSPull = millis();
+      //fetch raw scaling factors (Degrees * 10^-7)
+      long rawLat = myGNSS.getLatitude();
+      long rawLong = myGNSS.getLongitude();
+      //convert to full 64-bit floating-point decimal degrees
+      double decimalLat = rawLat / 10000000.0;
+      double decimalLong = rawLong / 10000000.0;
+
+      double alt = myGNSS.getAltitude() / 1000.0; // Converts mm to Meters
+      double speed = (myGNSS.getGroundSpeed() / 1000.0) * 3.6; // Converts mm/s to km/h
+      byte SIV = myGNSS.getSIV();
+      Serial.println("Lat: " + String(decimalLat,7));
+      Serial.println("Long: " + String(decimalLong,7));
+      Serial.println("Alt: " + String(alt) + "m");
+      Serial.println("Speed: " + String(speed) + "(km/h)");
+      Serial.println("SIV: " + String(SIV));
+>>>>>>> e33602288163a0a26b97b9ba4ec439bf34f54a3d:SHC_SoftwareCompile/SHC_SoftwareCompile.ino
     }
   //SD Card Storage (REVIEW: Implement Beyond Tests):
+<<<<<<< HEAD:SHC_SoftwareCompile.ino
     if(millis() - msLastWrite >= msWriteRate) { //Review: Can We Open The File Before Compiling Data To Send; It Would Be Optimal?
       Serial.println("{DEBUG - LOOP CHANGE: Preparing Data Transfer To SD Card...}");
       writeToSD();
@@ -536,16 +689,144 @@ void loop() {
       Serial.println("{DEBUG - LOOP CHANGE: Preparing Data Transfer To HC12 Radio...}");
       writeToHC12();
     }
-}
+=======
+  if(millis() - msLastWrite >= msWriteRate) { //Review: Can We Open The File Before Compiling Data To Send; It Would Be Optimal?
+    Serial.println("{DEBUG - LOOP CHANGE: Preparing Data Transfer To SD Card...}");
+    String dataString = ""; //String For Assembling Data To Log
+    /*Append Sensor Data To String (REVIEW: Implement):
+      for (int analogPin = 0; analogPin < 3; analogPin++) {
+        int sensor = analogRead(analogPin);
+        dataString += String(sensor);
+        if (analogPin < 2) {
+          dataString += ",";
+        }
+      }*/
+    dataString += millis();
+    dataString += ",";
 
+    dataString += decimalLong;
+    dataString += ",";
+
+    dataString += decimalLat;
+    dataString += ",";
+
+    dataString += alt;
+    dataString += ",";
+
+    dataString += pressure;
+    dataString += ",";
+
+    dataString += temp;
+    dataString += ",";
+
+    dataString += roll;
+    dataString += ",";
+
+    dataString += pitch;
+    dataString += ",";
+
+    dataString += yaw;
+    dataString += ",";
+
+    dataString += Ax;
+    dataString += ",";
+
+    dataString += Ay;
+    dataString += ",";
+
+    dataString += Az;
+    dataString += ",";
+
+    dataString += speed;
+    //dataString += (data1 + ", " + data2 + ", " data3; //Convert Loop Above To Coe Below When Sensor Programs Join With This One (They Now Have!) | Repeat For All Data Stored
+    Serial.println("{DEBUG - LOOP CHANGE: Data Compiled; Now Writing In SD Card...}");
+    File dataFile = SD.open("datalog.csv", FILE_WRITE); //Open File (Only One File Can Open At A Time)
+    if(dataFile) { //If File Is Available, Write To It
+      msLastWrite = millis();
+      dataFile.println(dataString);
+      dataFile.close();
+      Serial.println(dataString); //Print To Serial Port
+      Serial.println("{DEBUG - LOOP SUCCESS: Data Successfully Written! :>}");
+    }
+    else { //If File Is Not Open, Show Error
+      Serial.println("{DEBUG - LOOP ERROR: Error Opening datalog.txt. :<}");
+    }
+  }
+  //HC12 Radio Transmission (REVIEW: Implement Past Test):
+    if(millis() - msLastRadio >= msRadioRate) {
+      digitalWrite(LED_BUILTIN, state); //REVIEW: What Is The Purpose Of This Line?
+      String dataString = "";
+      /*dataString += time;
+      dataString += ",";
+  
+      dataString += longitude;
+      dataString += ",";
+
+      dataString += latitude;
+      dataString += ",";
+  
+      dataString += altitude;
+      dataString += ",";
+  
+      dataString += pressure;
+      dataString += ",";
+  
+      dataString += temperature;
+      dataString += ",";
+  
+      dataString += roll;
+      dataString += ",";
+  
+      dataString += pitch;
+      dataString += ",";
+  
+      dataString += yaw;
+      dataString += ",";
+  
+      dataString += Ax;
+      dataString += ",";
+  
+      dataString += Ay;
+      dataString += ",";
+  
+      dataString += Az;
+      dataString += ",";
+  
+      dataString += speed;*/
+      HC12.println(dataString);
+      msLastRadio = millis();
+      Serial.println("{DEBUG - LOOP SUCCESS: Data Successfully Transmitted To HC12 Radio! :>}");
+      state != state;
+      /*Recieve From Ground Station:
+        if(HC12.available() > 0) {
+          Serial.print(millis());
+          Serial.print(" RF: ");
+          while (HC12.available() > 0) {
+            Serial.print(char(HC12.read()));
+          }
+        }*/
+    }
+
+  /*Delay For Loop Cycles: Removed As A Better Solution Exists (If Statements)
+    msLoop = millis()-msLoopBegin();
+    Serial.println("{DEBUG - LOOP CALC: Total Loop Duration " + String(msLoop) + "ms | Delay " + String(msRate-msLoop) + " Until Next}");
+    Serial.println();
+    delay(msRate-msLoop)); //Keep Rate of 10hz*/
+>>>>>>> e33602288163a0a26b97b9ba4ec439bf34f54a3d:SHC_SoftwareCompile/SHC_SoftwareCompile.ino
+}
 //Printing Values (REVIEW: Thorough Testing):
+<<<<<<< HEAD:SHC_SoftwareCompile.ino
 /*void printEvent(sensors_event_t* event) {
+=======
+/*
+void printEvent(sensors_event_t* event) {
+>>>>>>> e33602288163a0a26b97b9ba4ec439bf34f54a3d:SHC_SoftwareCompile/SHC_SoftwareCompile.ino
   double x = -1000000, y = -1000000 , z = -1000000; //Error-Checking Values
   if (event->type == SENSOR_TYPE_ORIENTATION) {
     Serial.print("Orient:");
-    x = event->orientation.x; //yaw
-    y = event->orientation.y; //roll
-    z = event->orientation.z; //pitch
+    yaw = event->orientation.x; //yaw
+    roll = event->orientation.y; //roll
+    pitch = event->orientation.z; //pitch
     Serial.print("\tyaw= ");
     Serial.print(x);
     Serial.print(" |\troll= ");
@@ -555,9 +836,15 @@ void loop() {
   }
   else if (event->type == SENSOR_TYPE_LINEAR_ACCELERATION) {
     Serial.print("Linear:");
+<<<<<<< HEAD:SHC_SoftwareCompile.ino
     x = event->acceleration.x;
     y = event->acceleration.y;
     z = event->acceleration.z;
+=======
+    ax = event->acceleration.x;
+    ay = event->acceleration.y;
+    az = event->acceleration.z;
+>>>>>>> e33602288163a0a26b97b9ba4ec439bf34f54a3d:SHC_SoftwareCompile/SHC_SoftwareCompile.ino
     Serial.print("\tAx= ");
     Serial.print(x);
     Serial.print(" |\tAy= ");
@@ -565,43 +852,66 @@ void loop() {
     Serial.print(" |\tAz= ");
     Serial.println(z);
   }
-  /*Accelerometer (REVIEW: Commented; Do We Plan On Exlcuding?):
+  Accelerometer (REVIEW: Commented; Do We Plan On Exlcuding?):
     if(event->type == SENSOR_TYPE_ACCELEROMETER) {
       Serial.print("Accl:");
       x = event->acceleration.x;
       y = event->acceleration.y;
       z = event->acceleration.z;
-    }*/
-  /*Gyroscope (REVIEW: Commented; Do We Plan On Exlcuding?):
+    }
+  Gyroscope (REVIEW: Commented; Do We Plan On Exlcuding?):
     else if (event->type == SENSOR_TYPE_GYROSCOPE) {
       Serial.print("Gyro:");
       x = event->gyro.x;
       y = event->gyro.y;
       z = event->gyro.z;
+<<<<<<< HEAD:SHC_SoftwareCompile.ino
     }*/
+=======
+    }
+>>>>>>> e33602288163a0a26b97b9ba4ec439bf34f54a3d:SHC_SoftwareCompile/SHC_SoftwareCompile.ino
   /*Rotation Vector (REVIEW: Commented; Do We Plan On Exlcuding?):
     else if (event->type == SENSOR_TYPE_ROTATION_VECTOR) {
       Serial.print("Rot:");
       x = event->gyro.x;
       y = event->gyro.y;
       z = event->gyro.z;
+<<<<<<< HEAD:SHC_SoftwareCompile.ino
     }*/
   /*Linear Acceleration (REVIEW: Commented; Do We Plan On Exlcuding?):
+=======
+    }
+  Linear Acceleration (REVIEW: Commented; Do We Plan On Exlcuding?):
+>>>>>>> e33602288163a0a26b97b9ba4ec439bf34f54a3d:SHC_SoftwareCompile/SHC_SoftwareCompile.ino
     else if (event->type == SENSOR_TYPE_MAGNETIC_FIELD) {
     Serial.print("Mag:");
     x = event->magnetic.x;
     y = event->magnetic.y;
     z = event->magnetic.z;
+<<<<<<< HEAD:SHC_SoftwareCompile.ino
     }*/
   /*Gravity (REVIEW: Commented; Do We Plan On Exlcuding?):
+=======
+    }
+  Gravity (REVIEW: Commented; Do We Plan On Exlcuding?):
+>>>>>>> e33602288163a0a26b97b9ba4ec439bf34f54a3d:SHC_SoftwareCompile/SHC_SoftwareCompile.ino
     else if (event->type == SENSOR_TYPE_GRAVITY) {
       Serial.print("Gravity:");
       x = event->acceleration.x;
       y = event->acceleration.y;
       z = event->acceleration.z;
+<<<<<<< HEAD:SHC_SoftwareCompile.ino
     }*/
   //else {
     //Serial.println(F("{DEBUG - PRINT ERROR: Something Went Wrong When Trying To Print Data}"));
     //return;
   }
 }
+=======
+    }
+  else {
+    Serial.println("something went wrong trying to display data");
+    return;
+  }
+}*/
+>>>>>>> e33602288163a0a26b97b9ba4ec439bf34f54a3d:SHC_SoftwareCompile/SHC_SoftwareCompile.ino
