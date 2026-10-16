@@ -82,16 +82,17 @@ for i = 1:n
     ti = t_s(keep);
     yi = y(keep);
 
-
+    % checks to see if the data is empty or not
     if isempty(yi)
         warning('%s has no valid samples, skipping.', label);
         continue;
     end
 
+    % prints the summary for the current column
     fprintf('%s Max: %f  Min: %f  (missing: %d, spikes:%d)\n', ...
             label, max(yi), min(yi), nMissing, nSpikes);
 
-    % ---- Plot ----
+    % plotting the graph for current column
     figure;
     plot(ti, yi, 'b-', 'LineWidth', 2);
     xlabel('Time (s)');
