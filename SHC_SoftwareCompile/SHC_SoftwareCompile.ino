@@ -1,7 +1,6 @@
-/*Documentation (REVIEW: Add Libraries | Ensure Correct Information):
-  SHC - The One Plane: Full Software Code; Collective of All Software For The Aircraft
+/*SHC - The One Plane: Full Software Code; Collective of All Software For The Aircraft
   Created: 7 October 2026
-  Modified: 15 October 2026
+  Modified: 17 October 2026
   By Arwyn & Seito
 
   Uses Adafruit BMP3xx Library.
@@ -17,31 +16,36 @@
     SD Card Attached to SPI Bus: MISO - Pin4 | MOSI - Pin7 | CS - Pin5 | SCK - Pin6
   Notation Source: https://docs.arduino.cc/built-in-examples/digital/toneMelody/*/
 
-//Libraries (REVIEW: Why Are Each Included?):
-  #include <Wire.h> //core I2C communication
-  #include <Adafruit_Sensor.h> //altitude & pressure sensing
-  #include "Adafruit_BMP3XX.h" //altitude & pressure sensing specifically for the bmp388
-  #include <Adafruit_BNO055.h> //motion & orientation sensing specifically for the bno055
-  #include <utility/imumaths.h> //motion & orientation sensing
-  #include <SparkFun_u-blox_GNSS_Arduino_Library.h> //http://librarymanager/All#SparkFun_u-blox_GNSS location & GPS tracking
-  #include <SPI.h> //enables SPI communication for data logging
-  #include <SD.h> //data logging for the SD card
+//Libraries:
+  #include <Wire.h> //Core I2C Communication
+  #include <Adafruit_Sensor.h>  //General Altitude & Pressure Sensing
+  #include "Adafruit_BMP3XX.h"  //BMP388 - Altitude & Pressure Sensing
+  #include <Adafruit_BNO055.h>  //BNO055 - Motion & Orientation Sensing
+  #include <utility/imumaths.h> //Motion & Orientation Sensing
+  #include <SparkFun_u-blox_GNSS_Arduino_Library.h> //Location & GPS Tracking | http://librarymanager/All#SparkFun_u-blox_GNSS
+  #include <SPI.h>  //Enables SPI Communication For Data Logging
+  #include <SD.h> //Data Logging For SD Card
 
 //Pins & Sensor Set-Up (REVIEW: Review Commented Pins | Implement Details Of Each Pin):
+<<<<<<< HEAD
   #define SDA 4 //I2C manual configuration
   #define SCL 5 //I2C manual configuration
   #define txPin 0 //HC12 Radio
   #define rxPin 1 //HC12 Radio
+=======
+  #define SDA 4 //Sensors
+  #define SLC 5 //Sensors
+  #define txPin 1 //HC12 Radio
+  #define rxPin 0 //HC12 Radio
+>>>>>>> 0442241bb91d1350fc493d27a2cbc0bc7d953dea
   #define HC12 Serial1  //HC12 Radio
+  //#define SD_SO 16  //SD Card
+  //#define DOOR 17 //This Will Detect A Signal And Send A Signal To Buzzer; Please Test, Please Test; Testing Is Good And Makes Me Happy :3
+  //#define SD_CLK 18 //SD Card
+  //#define SD_SI 19  //SD Card
   #define chipSelect 20 //SD Card
   #define BUZZER_PIN 21 //Connect Buzzer
   #define LED_WHITE 22  //Connect Blinking LED
-  /*Declare Pins For SPI - Do Not Need To Configure GPIO Pins When Using I2C
-    #define BMP_SCK 13
-    #define BMP_MISO 12
-    #define BMP_MOSI 11
-    #define BMP_CS 10
-    Instantiate Instance of SPI Class: #define spiPort SPI //Standard SPI Port*/
   SFE_UBLOX_GNSS myGNSS;
   Adafruit_BMP3XX bmp;
   Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28, &Wire); //Check I2C Device Address
@@ -86,17 +90,18 @@
   #define NOTE_B5  987.767
   
 //Aircraft States:
-  /*enum piracyStates {
+  enum piracyStates {
     PIRATE = 0;
     STANDBY;
     LAUNCH;
     FLIGHT;
     LANDED;
     CAPTAIN;
-  }*/
+  }
 
-//Global Variables (REVIEW: Ensure Descriptive Names & Implement Comments):
+//Global Variables:
   enum piracyStates State = PIRATE;
+<<<<<<< HEAD
   //const float SEALEVELPRESSURE_HPA 1013.25  //REVIEW: Can This Be A Const Float?
   int groundLevel = 0;  //REVIEW: Set Ground Level
   const int levelError = 5; //REVIEW: Error Requires Improved Estimate
@@ -137,26 +142,83 @@
   float durations[] { //Mr. Sandman Not Durations
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 2, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 8, 8, 4, 8, 2, 8, 8, 8, 4, 2, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 4, 8, 8, 8, 8, 4, 8, 8, 8, 8, 8, 4, 4, 4, 8, 8, 8, 8, 8, 8, 8, 4, 4, 8, 4, 8, 8, 4, 8, 2, 8, 8, 8, 4, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 4, 4, 8, 4, 8, 8, 8, 2, 4, 8, 8, 4, 4, 8, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 2, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 2, 1, 8
   };
+=======
+  bool state = false; //uart
+  int stateLED = LOW; //LED Starts As LOW (Off)
+  const int levelError = 5; //Feet Off The Ground While Still Classified As Ground Level
+  bool itFlew = false;  //Aircraft Flew
+  bool musicTime = false; //Sand Deployment Doors Opened
+  //Sensor Data:
+    const float SEALEVELPRESSURE_HPA 1013.25
+    double = storeTime = -9999999;
+    double groundLevel = -9999999;
+    double temperature = -9999999;
+    double pressure = -9999999;
+    double altitude = -9999999;
+    double deciLat = -9999999;
+    double deciLong = -9999999;
+    double roll = -9999999;
+    double pitch = -9999999;
+    double yaw = -9999999;
+    double accelX = -9999999;
+    double accelY = -9999999;
+    double accelZ = -9999999;
+    double speed = -9999999;
+    String dataString = "";
+  //Conditional Cycles:
+    const int msBMPPullRate = 100; //Time Between BMP388 Data Pulls
+    int msLastBMPPull = 0;
+    const int msBNOPullRate = 100; //Time Between BNO055 Data Pulls
+    int msLastBNOPull = 0;
+    const int msGNSSPullRate = 1000;  //Higher Rate Between GNSS Data Pulls To Limit SPI Traffic
+    int msLastGNSSPull = 0;
+    const int msWriteRate = 100;  //SD Card Write Rate
+    int msLastWrite = 0;
+    const int msRadioRate = 100;  //HC12 Radio Transmission Rate
+    int msLastRadio = 0;
+    const int msBlinkRate = 500;  //LED Blinking Rate
+    int msLastBlink = 0;
+    float noteDuration = 0; //Length Of Note Playing
+    int msLastNote = 0; //Time Since Last Note Played
+    int noteSeq = 0;  //Current Note In Sequence; Returns To 0 For Repeats
+  //Music - //Mr. Sandman:
+    bool mrSandman = true;
+    const int mrBPM = 142;  //Mr. Sandman BPM
+    const float mrNotesArr[] {
+      NOTE_C4, NOTE_E4, NOTE_G4, NOTE_B4, NOTE_A4, NOTE_G4, NOTE_E4, NOTE_C4, NOTE_D4, NOTE_F4, NOTE_A4, NOTE_C5, NOTE_B4, NOTE_C4, NOTE_E4, NOTE_G4,NOTE_B4, NOTE_A4, NOTE_G4, NOTE_E4, NOTE_C4, NOTE_D4, NOTE_F4, NOTE_A4, NOTE_C5, NOTE_B4, NOTE_G3, NOTE_A3, NOTE_B3, NOTE_A3, REST, REST, NOTE_B3, NOTE_B3, NOTE_A3, NOTE_B3, REST, NOTE_C4, NOTE_C4, NOTE_B3, NOTE_C4, NOTE_C4, REST, NOTE_B3, NOTE_F3, NOTE_F3, NOTE_E3, NOTE_F3, REST, REST, REST, NOTE_B3, NOTE_B3, NOTE_A3, NOTE_B3, REST, NOTE_A3, NOTE_E3, NOTE_E3, NOTE_D3, NOTE_E3, NOTE_G3, REST, NOTE_D4, NOTE_D4, NOTE_C4, NOTE_D4, NOTE_C4, NOTE_D4, NOTE_C4, NOTE_DS4, NOTE_DS4, NOTE_E4, NOTE_D4, REST, NOTE_B3, NOTE_A3, REST, REST, NOTE_B3, NOTE_B3, NOTE_A3, NOTE_B3, REST, REST, REST, NOTE_C4, NOTE_C4, NOTE_B3, NOTE_C4, NOTE_C4, REST, NOTE_B3, NOTE_F3, NOTE_F3, NOTE_E3, NOTE_F3, REST, REST, NOTE_D3, NOTE_F3, NOTE_A3, NOTE_C4, NOTE_C4, NOTE_C4, NOTE_D4, REST, NOTE_C4, NOTE_D4, NOTE_E4, NOTE_E4, NOTE_E4, NOTE_C4, NOTE_E4, NOTE_C4, NOTE_E4, NOTE_G4, NOTE_B4, NOTE_A4, NOTE_G4, NOTE_E4, NOTE_C4, NOTE_D4, NOTE_F4, NOTE_A4, NOTE_C5, NOTE_B4, NOTE_C4, NOTE_E4, NOTE_G4, NOTE_B4, NOTE_A4, NOTE_G4, NOTE_E4, NOTE_C4, NOTE_D4, NOTE_F4, NOTE_A4, NOTE_C5, NOTE_B4, NOTE_C5, NOTE_C5, REST
+    };
+    const float mrDurations[] {
+      8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 2, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 8, 8, 4, 8, 2, 8, 8, 8, 4, 2, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 4, 8, 8, 8, 8, 4, 8, 8, 8, 8, 8, 4, 4, 4, 8, 8, 8, 8, 8, 8, 8, 4, 4, 8, 4, 8, 8, 4, 8, 2, 8, 8, 8, 4, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 4, 4, 8, 4, 8, 8, 8, 2, 4, 8, 8, 4, 4, 8, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 2, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 2, 1, 8, 0.25
+    };
+    const int mrSize = sizeof(mrNotesArr) / sizeof(int);
+  //Music - Enter Sandman:
+    const int etrBPM = 130; //Enter Sandman BPM
+    const float etrNotesArr[] {
+      NOTE_E3, NOTE_G3, NOTE_AS3, NOTE_A3, REST, NOTE_E3, REST, NOTE_E3, NOTE_G3, NOTE_AS3, NOTE_A, REST, NOTE_E3, NOTE_G3, NOTE_AS3, NOTE_A3, REST, NOTE_G3, REST, NOTE_E3, REST
+    }
+    const float etrDurations[] {
+      4, 8, 8, 4, 8, 8, 8, 8, 8, 8, 4, 4, 4, 8, 8, 4, 8, 8, 8, 2, 0.25
+    }
+    const int etrSize = sizeof(etrNotesArr) / sizeof(int);
+>>>>>>> 0442241bb91d1350fc493d27a2cbc0bc7d953dea
 
 void availSerial() //Wait For Serial Monitor Availability (REVIEW: Is This Needed?):
 {
   Serial.println(F("{DEBUG - SETUP TEST: Testing Serial Monitor Availability...}"));
-  while(!Serial) { //Wait For Serial Port To Open In Terminal; Needed For Native USB Port Only
-    Serial.println(F("{DEBUG - SETUP ERROR: Serial Monitor Not Yet Available; Testing Again. :<)}"));
+  while(!Serial) {  //Wait For Serial Port To Open In Terminal; Needed For Native USB Port Only
+    Serial.println(F("{DEBUG - SETUP ERROR: Serial Monitor Not Yet Available; Testing Again...}"));
     delay(10);
   }
   Serial.println(F("{DEBUG - SETUP Success: Serial Monitor Available! :>}"));
 }
-
-void initPinModes() //Initialize Pin Modes
+void initPinModes() //Pins Set-Up
 {
   Serial.println(F("{DEBUG - SETUP TEST: Initializing Pin Modes...}"));
   Serial.begin(115200); //REVIEW: Why 115200?
-  pinMode(BUZZER_PIN, OUTPUT);  //Define Pin Mode For The Buzzer
-  pinMode(LED_BUILTIN, OUTPUT); //Define Pin Mode For Blinking LED
-  pinMode(rxPin, INPUT);  //Define Pin Mode For HC12 rx
-  pinMode(txPin, OUTPUT); //Define Pin Mode For HC12 tx
-  //spiPort.begin();
+  pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT); //Turn-on All Non-White LEDs
+  pinMode(rxPin, INPUT);
+  pinMode(txPin, OUTPUT);
   Wire.begin();
   //Set-Up SDA & SCL Wires (REVIEW: Is This Needed?):
   Serial.println("{DEBUG - TEST: Initializing SDA & SCL Wires...}");
@@ -165,8 +227,7 @@ void initPinModes() //Initialize Pin Modes
   Serial.println("{DEBUG - SUCCESS: Set-Up SDA & SCL Wires! :>}");
   Serial.println(F("{DEBUG - SETUP SUCCESS: Pin Modes Initialized! :>}"));
 }
-
-void initBMP() //Initialize BMP388
+void initBMP() //BMP388 Initialization & Error-Checking
 { 
   Serial.println(F("{DEBUG - SETUP TEST: Initializing BMP388 Sensor...}"));
   if (!bmp.begin_I2C()) { //Testing Hardware I2C Mode
@@ -178,8 +239,7 @@ void initBMP() //Initialize BMP388
   bmp.setOutputDataRate(BMP3_ODR_50_HZ);
   Serial.println(F("{DEBUG - SETUP SUCCESS: BMP388 Sensor Initialized! :>}"));
 }
-
-void initBNO() //Initialize BNO055 
+void initBNO() //BNO055 Initialization & Error-Checking
 { 
   Serial.println(F("{DEBUG - SETUP TEST: Initializing BNO055 Sensor...}"));
   if(!bno.begin()) {
@@ -187,21 +247,16 @@ void initBNO() //Initialize BNO055
   }
   Serial.println(F("{DEBUG - SETUP SUCCESS: BNO055 Sensor Initialized! :>}"));
 }
-
-void initGNSS() //Initialize GNSS
+void initGNSS() //GNSS Initialization & Error-Checking
 {
   Serial.println(F("{DEBUG - SETUP TEST: Initializing GNSS...}"));
   //myGNSS.enableDebugging(); //Show Debug Messages On Serial
   if(!myGNSS.begin(Wire)) { //Connect To GNSS Using SPI Port, csPin, & Speed Setting
     Serial.println(F("{DEBUG - SETUP ERROR: GNSS Not Detected; Check Wiring. :<}"));
   }
-  //myGNSS.factoryDefault(); delay(5000); //Reset GNSS To Factory Defaults
-  //myGNSS.setPortOutput(COM_PORT_SPI, COM_TYPE_UBX); //Set SPI Port To Output UBX Only (Turn Off NMEA Noise)
-  //myGNSS.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT);  //Save Only Communication Port Settings To Flsh And BBR
   myGNSS.setI2COutput(COM_TYPE_UBX); //Set I2C Port To Output UBX Protocol Data Only
   Serial.println(F("{DEBUG - SETUP SUCCESS: GNSS Successfully Initialized! :>}"));
 }
-
 void initSD() //Initialize SD Card
 {
   Serial.println(F("{DEBUG - SETUP TEST: Initalizing SD Card...}"));
@@ -238,7 +293,6 @@ void initSD() //Initialize SD Card
       }*/
     Serial.println(F("{DEBUG - SETUP SUCCESS: SD Card Initialization Successful! :>}"));  
 }
-
 void initHC12()
 {
   Serial.println(F("{DEBUG - SETUP TEST: Initializing HC12 Serial Link...}"));
@@ -251,62 +305,62 @@ void initHC12()
   }*/
   Serial.println(F("{DEBUG - SETUP SUCCESS: HC12 Serial Link Initialized! :>}"));
 }
-
 void blinkLED() //Blink The LED; Does Not Perform Time-Related Functions
 {
-  if(stateLED == LOW) {
+  if(stateLED = LOW) {
     stateLED = HIGH;
-    Serial.println("; Switching LED State (Off -> On)}");
+    Serial.println("Switching LED State (Off -> On)}");
   }
   else {
     stateLED = LOW;
-    Serial.println("; Switching LED State (On -> Off)}");
+    Serial.println("Switching LED State (On -> Off)}");
   }
-  digitalWrite(LED_WHITE, stateLED);
+  digitalWrite(LED_WHITE, stateLED)
 }
-
-bool readSensors()  //Read All Sensor Data
+bool readBMP355()
 {
-    Serial.println("Current Time: " + String(millis()) + "ms");
-    if(!bmp.performReading()) { //Review (Test): Implement System To Redo Reading If Error
+  if(!bmp.performReading()) {
       Serial.println(F("{DEBUG - LOOP ERROR: BMP388 Failed To Perform Reading. :<}"));
       return false;
     }
 
     Serial.println(F("{DEBUG - LOOP SUCCESS: BMP388 Successfully Read; Now Outputting Data:}"));
-    temp = bmp.temperature;
+    temperature = bmp.temperature;
+    Serial.println("Temperature: " + String(temperature) + "*C");
     pressure = bmp.pressure / 100.0;
-    Serial.println("Temperature: " + String(bmp.temperature) + "*C");
-    Serial.println("Pressure: " + String(bmp.pressure / 100.0) + "hPa");
-    //Serial.print("Approx. Altitude: " + String(bmp.readAltitude(SEALEVELPRESSURE_HPA)) + "m");
-    Serial.println(F("{DEBUG - LOOP READING: BMP388 Read, Now Reading From BNO055...}"));
-
+    Serial.println("Pressure: " + String(pressure) + "hPa");
+    //altitude = bmp.readAltitude(SEALEVELPRESSURE_HPA);
+    //Serial.print("Approx. Altitude: " + String(altitude)) + "m");
+    Serial.println(F("{DEBUG - LOOP SUCCESS: BMP388 Data Outputted!}"));
+}
+bool readBNO055()
+{
+    Serial.println(F("{DEBUG - LOOP CHANGE: Now Reading From BNO055...}"));
     //REVIEW: Implement Way To Verify Errorless Data Pull?
-    sensors_event_t orientationData, linearAccelData; //Additional Data Points: angVelocityData, accelerometerData, gravityData, magnetometerData
+    sensors_event_t orientationData, linearAccelData;
     bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
     bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
-    if (orientationData.type == SENSOR_TYPE_ORIENTATION) {
-      Serial.print("Orient:");
-      yaw   = orientationData.orientation.x; 
-      roll  = orientationData.orientation.y; 
+    if(orientationData.type == SENSOR_TYPE_ORIENTATION) {
+      Serial.print("Orientation:");
+      yaw = orientationData.orientation.x;       
+      Serial.print("\tyaw: " + String(yaw));
+      roll = orientationData.orientation.y; 
+      Serial.print(" |\troll: " + String(roll));
       pitch = orientationData.orientation.z; 
-      Serial.print("\tyaw= ");   Serial.print(yaw);
-      Serial.print(" |\troll= ");  Serial.print(roll);
-      Serial.print(" |\tpitch= "); Serial.println(pitch);
+      Serial.print(" |\tpitch: " + String(pitch));
     } 
 
   if(linearAccelData.type == SENSOR_TYPE_LINEAR_ACCELERATION) {
       Serial.print("Linear:");
-      ax = linearAccelData.acceleration.x;
-      ay = linearAccelData.acceleration.y;
-      az = linearAccelData.acceleration.z;
-      Serial.print("\tAx= ");   Serial.print(ax);
-      Serial.print(" |\tAy= ");  Serial.print(ay);
-      Serial.print(" |\tAz= ");  Serial.println(az);
+      accelX = linearAccelData.acceleration.x;
+      Serial.print("\taccelX: " + String(accelX));
+      accelY = linearAccelData.acceleration.y;
+      Serial.print(" |\taccelY: " + String(accelY)));
+      accelZ = linearAccelData.acceleration.z;
+      Serial.print(" |\taccelZ: " + String(accelZ));
     }
     /*Additional Data Points (REVIEW: Either Include Or Remove):
       bno.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
-      bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
       bno.getEvent(&accelerometerData, Adafruit_BNO055::VECTOR_ACCELEROMETER);
       bno.getEvent(&magnetometerData, Adafruit_BNO055::VECTOR_MAGNETOMETER);
       bno.getEvent(&gravityData, Adafruit_BNO055::VECTOR_GRAVITY);*/
@@ -321,68 +375,47 @@ bool readSensors()  //Read All Sensor Data
       Serial.println("Gyro = " + String(gyro));
       Serial.println("Accel = " + String(accel));
       Serial.println("Mag = " + String(mag));*/
-    //Serial.println("{DEBUG - LOOP CALC: Time Since Last GNSS Data Pull " + String(millis()-msLastGNSSPull) + "ms}");
-    if(millis() - msLastGNSSPull >= msGNSSPullRate) {
-      if(myGNSS.getPVT() == true){ //fetches the latest Position, Velocity, and Time (PVT) data packet from the GNSS module and updates the library's internal structure
-        if(myGNSS.getGnssFixOk() == true){ //checks whether your GPS/GNSS module has successfully locked onto enough satellites to provide a reliable, accurate location fix
-          Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastGNSSPull) + "ms >= " + String(msGNSSPullRate) + "ms; Pulling Data...}");
-          //REVIEW: Implement System To Check For Reading Errors
-          msLastGNSSPull = millis();
-          //fetch raw scaling factors (Degrees * 10^-7)
-          long rawLat = myGNSS.getLatitude();
-          long rawLong = myGNSS.getLongitude();
-          //convert to full 64-bit floating-point decimal degrees
-          decimalLat = rawLat / 10000000.0;
-          decimalLong = rawLong / 10000000.0;
-
-          alt = myGNSS.getAltitudeMSL() / 1000.0; // Converts mm to Meters
-          speed = (myGNSS.getGroundSpeed() / 1000.0) * 3.6; // Converts mm/s to km/h
-          //byte SIV = myGNSS.getSIV(); 
-          Serial.println("Lat: " + String(decimalLat,7));
-          Serial.println("Long: " + String(decimalLong,7));
-          Serial.println("Alt (MSL): " + String(alt) + "m");
-          Serial.println("Speed: " + String(speed) + "(km/h)");
-          //Serial.println("SIV: " + String(SIV));
-        }
-      }
-    }
-    Serial.println(F("{DEBUG - LOOP SUCCESS: All Sensor Data Successfully Read! :>}"));
     return true;
 }
-
-String dataCompile()
+bool readGNSS()
 {
-  String dataString = "";
-  dataString += String(millis());
-  dataString += ",";
-  dataString += String(decimalLong,6);
-  dataString += ",";
-  dataString += String(decimalLat,6);
-  dataString += ",";
-  dataString += String(alt,2);
-  dataString += ",";
-  dataString += String(pressure,2);
-  dataString += ",";
-  dataString += String(temp,2);
-  dataString += ",";
-  dataString += String(roll,2);
-  dataString += ",";
-  dataString += String(pitch,2);
-  dataString += ",";
-  dataString += String(yaw,2);
-  dataString += ",";
-  dataString += String(ax,2);
-  dataString += ",";
-  dataString += String(ay,2);
-  dataString += ",";
-  dataString += String(az,2);
-  dataString += ",";
-  dataString += String(speed,2);
-  return dataString;
+  if(myGNSS.getPVT() == true) {
+    if(myGNSS.getGnssFixOk() == true) {
+      //REVIEW: Implement System To Check For Reading Errors
+      long rawLat = myGNSS.getLatitude();
+      long rawLong = myGNSS.getLongitude();
+      decimalLat = rawLat / 10000000.0;
+      decimalLong = rawLong / 10000000.0;
+      alt = myGNSS.getAltitudeMSL() / 1000.0; // Converts mm to Meters
+      speed = (myGNSS.getGroundSpeed() / 1000.0) * 3.6; // Converts mm/s to km/h
+      //byte SIV = myGNSS.getSIV();
+      Serial.println("Lat: " + String(decimalLat,7));
+      Serial.println("Long: " + String(decimalLong,7));
+      Serial.println("Alt (MSL): " + String(alt) + "m");
+      Serial.println("Speed: " + String(speed) + "(km/h)");
+      return true;
+    }
+  }
+  return false;
 }
-void writeToSD()
+void dataCompile()
 {
-  String dataString = dataCompile(); //String For Logging Data
+  dataString = String(storeTime) + ",";
+  dataString += String(decimalLong,6) + ",";
+  dataString += String(decimalLat,6) + ",";
+  dataString += String(alt,2) + ",";
+  dataString += String(pressure,2) + ",";
+  dataString += String(temp,2) + ",";
+  dataString += String(roll,2) + ",";
+  dataString += String(pitch,2) + ",";
+  dataString += String(yaw,2) + ",";
+  dataString += String(accelX,2) + ",";
+  dataString += String(accelY,2) + ",";
+  dataString += String(accelZ,2) + ",";
+  dataString += String(speed,2);
+}
+bool writeToSD()
+{
   Serial.println("{DEBUG - LOOP CHANGE: Data Compiled; Now Writing In SD Card...}");
   File dataFile = SD.open("datalog.csv", FILE_WRITE); //Open File (Only One File Can Open At A Time)
   if(dataFile) { //If File Is Available, Write To It
@@ -391,28 +424,35 @@ void writeToSD()
     dataFile.close();
     Serial.println(dataString); //Print To Serial Port
     Serial.println("{DEBUG - LOOP SUCCESS: Data Successfully Written! :>}");
+    return true;
   }
   else { //If File Is Not Open, Show Error
     Serial.println("{DEBUG - LOOP ERROR: Error Opening datalog.csv. :<}");
   }
+  return false;
 }
-
-void writeToHC12()
+bool writeToHC12()
 {
+<<<<<<< HEAD
     //digitalWrite(LED_BUILTIN, state); //visual indicator
     String dataString = dataCompile();
     HC12.println(dataString);
+=======
+  digitalWrite(LED_BUILTIN, state); //Visual Indicator
+  String dataString = dataCompile();    HC12.println(dataString);
+>>>>>>> 0442241bb91d1350fc493d27a2cbc0bc7d953dea
     msLastRadio = millis();
     Serial.println("{DEBUG - LOOP SUCCESS: Data Successfully Transmitted To HC12 Radio! :>}");
     //state != state;
     /*Recieve From Ground Station:
       if(HC12.available() > 0) {
-        Serial.print(millis());
-        Serial.print(" RF: ");
-        while (HC12.available() > 0) {
-          Serial.print(char(HC12.read()));
-        }
-      }*/
+      Serial.print(millis());
+      Serial.print(" RF: ");
+      while (HC12.available() > 0) {
+        Serial.print(char(HC12.read()));
+      }
+    }*/
+    return true;
 }
 
 void setup() {
@@ -428,32 +468,33 @@ void setup() {
 }
 
 void loop() {
-  //Loop-Related Variables:
-    //int msLoopBegin = millis();
-    //int msLoop = -1;
   //Blink LED:
-    //Serial.println("{DEBUG - LOOP CALC: Time Since Last Blink " + String(millis()-msLastBlink) + "ms}");
     if(millis() - msLastBlink >= msBlinkRate) {
-      Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastBlink) + "ms >= " + String(msBlinkRate) + "ms.");
-      msLastBlink = millis();
+      Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastBlink) + "ms >= " + String(msBlinkRate) + "ms.; ");
       blinkLED();
+      msLastBlink = millis();
     }
-  //REVIEW: Implement When Sand Deposit Switch Flipped
-    //Buzzer Melody:
-      if(!buzzerSounded) {
-        //Serial.println("{DEBUG - LOOP CALC: Buzzer Notes (" + String(millis() - msLastNote()) + "ms >= " + String(duration * 1.30) + "ms)}");
-        if((noteSeq < size) && (millis() - msLastNote >= duration * 1.30)) {
-          noTone(BUZZER_PIN); //Stop Playing On The Buzzer
-          msLastNote = millis();
-          duration = 60 / BPM / (durations[noteSeq]/4); //Duration(sec) Of Given Note
-          tone(BUZZER_PIN, notesArr[noteSeq], duration);
-          noteSeq++;
-        }
+  //Buzzer Melody (REVIEW: If Signal Recieved From Pin):
+      //Serial.println("{DEBUG - LOOP CALC: Buzzer Notes (" + String(millis() - msLastNote()) + "ms >= " + String(duration * 1.30) + "ms)}");
+      if((noteSeq < size) && (millis() - msLastNote >= noteDuration * 1.30)) {
         if(noteSeq == size) {
-          buzzerSounded = true;
+          noteSeq = 0;
+          mrSandman = !mrSandman;
         }
+        noTone(BUZZER_PIN); //Stop Playing On The Buzzer
+        if(mrSandman) {
+          noteDuration = 60 / mrBPM / (mrDurations[mrNoteSeq]/4); //Duration(sec) Of Given Note
+          tone(BUZZER_PIN, notesArr[mrNoteSeq], noteDuration);
+        }
+        else {
+          noteDuration = 60 / etrBPM / (etrDurations[etrNoteSeq]/4); //Duration(sec) Of Given Note
+          tone(BUZZER_PIN, notesArr[etrNoteSeq], noteDuration);
+        }
+        noteSeq++;
+        msLastNote = millis();
       }
-
+  /*CAP: Below Ground Level, Above 300ft
+  //CAP: Negative Time
   switch(STATE) { //State Machine
     case 0: //PIRATE
       if((altitude >= groundLevel - levelError && altitude <= groundLevel + levelError) && !itFlew)
@@ -470,7 +511,7 @@ void loop() {
       break;
     case 2: //LAUNCH
       //REVIEW: Sensor Data
-      if(altitude > groundLevel){//REVIEW: In Flight; Altitude > Ground Level
+      if(altitude > groundLevel) //REVIEW: In Flight; Altitude > Ground Level
         STATE = FLIGHT;
         itFlew = true;
       }
@@ -485,7 +526,7 @@ void loop() {
     case 4: //LANDED
       //REVIEW: Sensor Data
       if(false) { //REVIEW: Stopped Moving
-        STATE = CAPTAIN;
+        STATE = CAPTAIN
       }
       break;
     case 5: //CAPTAIN
@@ -497,98 +538,38 @@ void loop() {
       break;
     default:
       break;
-  }
+  }*/
 
-  //Output Sensor Data (REVIEW: Implement Data Analysis):
-    //Serial.println("{DEBUG - LOOP CALC: Time Since Last Sensor Data Pull " + String(millis()-msLastPull) + "ms.}");
-    if(millis() - msLastPull >= msPullRate) {
-      Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastPull) + "ms >= " + String(msPullRate) + "ms; Pulling BMP388 & BNO055 Sensor Data...}");
-      if(!readSensors())
-        return;
-      msLastPull = millis();
-    }   
+  //Output Sensor Data:
+    storeTime = millis();
+    Serial.println("Current Time: " + String(storeTime) + "ms");
+    if(millis() - msLastBMPPull >= msBMPPullRate) {
+      Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastBMPPull) + "ms >= " + String(msBMPPullRate) + "ms; Pulling BMP388 Sensor Data...}");
+      if(readBMP())
+        msLastBMPPull = millis();
+    }
+    if(millis() - msLastBN0Pull >= msBNOPullRate) {
+        Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastBNOPull) + "ms >= " + String(msBNOPullRate) + "ms; Pulling BNO055 Sensor Data...}");
+        if(readBNO)
+          msLastBNOPull = millis();
+    }
     if(millis() - msLastGNSSPull >= msGNSSPullRate) {
       Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastGNSSPull) + "ms >= " + String(msGNSSPullRate) + "ms; Pulling Data...}");
-      msLastGNSSPull = millis();
+      if(readGNSS());
+        msLastGNSSPull = millis();
     }
+  Serial.println(F("{DEBUG - LOOP SUCCESS: All Sensor Data Successfully Read! :>}"));
+
   //SD Card Storage (REVIEW: Implement Beyond Tests):
     if(millis() - msLastWrite >= msWriteRate) { //Review: Can We Open The File Before Compiling Data To Send; It Would Be Optimal?
       Serial.println("{DEBUG - LOOP CHANGE: Preparing Data Transfer To SD Card...}");
-      writeToSD();
+      if(writeToSD())
+        msLastWrite = millis();
   }
   //HC12 Radio Transmission (REVIEW: Implement Past Test):
     if(millis() - msLastRadio >= msRadioRate) {
       Serial.println("{DEBUG - LOOP CHANGE: Preparing Data Transfer To HC12 Radio...}");
-      writeToHC12();
+      if(writeToHC12())
+        msLastRadio = millis();
     }
 }
-//Printing Values (REVIEW: Thorough Testing):
-/*void printEvent(sensors_event_t* event) {
-  double x = -1000000, y = -1000000 , z = -1000000; //Error-Checking Values
-  if (event->type == SENSOR_TYPE_ORIENTATION) {
-    Serial.print("Orient:");
-    yaw = event->orientation.x; //yaw
-    roll = event->orientation.y; //roll
-    pitch = event->orientation.z; //pitch
-    Serial.print("\tyaw= ");
-    Serial.print(x);
-    Serial.print(" |\troll= ");
-    Serial.print(y);
-    Serial.print(" |\tpitch= ");
-    Serial.println(z);
-  }
-  else if (event->type == SENSOR_TYPE_LINEAR_ACCELERATION) {
-    Serial.print("Linear:");
-    x = event->acceleration.x;
-    y = event->acceleration.y;
-    z = event->acceleration.z;
-    ax = event->acceleration.x;
-    ay = event->acceleration.y;
-    az = event->acceleration.z;
-    Serial.print("\tAx= ");
-    Serial.print(x);
-    Serial.print(" |\tAy= ");
-    Serial.print(y);
-    Serial.print(" |\tAz= ");
-    Serial.println(z);
-  }
-  Accelerometer (REVIEW: Commented; Do We Plan On Exlcuding?):
-    if(event->type == SENSOR_TYPE_ACCELEROMETER) {
-      Serial.print("Accl:");
-      x = event->acceleration.x;
-      y = event->acceleration.y;
-      z = event->acceleration.z;
-    }
-  Gyroscope (REVIEW: Commented; Do We Plan On Exlcuding?):
-    else if (event->type == SENSOR_TYPE_GYROSCOPE) {
-      Serial.print("Gyro:");
-      x = event->gyro.x;
-      y = event->gyro.y;
-      z = event->gyro.z;
-    }
-  Rotation Vector (REVIEW: Commented; Do We Plan On Exlcuding?):
-    else if (event->type == SENSOR_TYPE_ROTATION_VECTOR) {
-      Serial.print("Rot:");
-      x = event->gyro.x;
-      y = event->gyro.y;
-      z = event->gyro.z;
-    }
-  Linear Acceleration (REVIEW: Commented; Do We Plan On Exlcuding?):
-    else if (event->type == SENSOR_TYPE_MAGNETIC_FIELD) {
-    Serial.print("Mag:");
-    x = event->magnetic.x;
-    y = event->magnetic.y;
-    z = event->magnetic.z;
-    }
-  Gravity (REVIEW: Commented; Do We Plan On Exlcuding?):
-    else if (event->type == SENSOR_TYPE_GRAVITY) {
-      Serial.print("Gravity:");
-      x = event->acceleration.x;
-      y = event->acceleration.y;
-      z = event->acceleration.z;
-    }
-  //else {
-    //Serial.println(F("{DEBUG - PRINT ERROR: Something Went Wrong When Trying To Print Data}"));
-    //return;
-  }
-}*/
