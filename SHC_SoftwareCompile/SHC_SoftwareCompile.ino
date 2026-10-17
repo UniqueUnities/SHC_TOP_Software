@@ -115,7 +115,6 @@
   float duration = 0; //Duration Of Buzzer Notes
   bool buzzerSounded = false; //Ensures Buzzer Only Plays Once
   bool itFlew = false;  //Aircraft Flew
-  long baud = 9600; //uart
   bool state = false; //uart
   long rawLat=0;
   long rawLong=0;
@@ -159,7 +158,6 @@ void initPinModes() //Initialize Pin Modes
   pinMode(LED_BUILTIN, OUTPUT); //Define Pin Mode For Blinking LED
   pinMode(rxPin, INPUT);  //Define Pin Mode For HC12 rx
   pinMode(txPin, OUTPUT); //Define Pin Mode For HC12 tx
-  Serial.begin(baud); //REVIEW: What Does This Do?
   //spiPort.begin();
   Wire.begin();
   /*Set-Up SDA & SCL Wires (REVIEW: Is This Needed?):
@@ -340,12 +338,12 @@ bool readSensors()  //Read All Sensor Data
 
       alt = myGNSS.getAltitude() / 1000.0; // Converts mm to Meters
       speed = (myGNSS.getGroundSpeed() / 1000.0) * 3.6; // Converts mm/s to km/h
-      byte SIV = myGNSS.getSIV();
+      //byte SIV = myGNSS.getSIV();
       Serial.println("Lat: " + String(decimalLat,7));
       Serial.println("Long: " + String(decimalLong,7));
       Serial.println("Alt: " + String(alt) + "m");
       Serial.println("Speed: " + String(speed) + "(km/h)");
-      Serial.println("SIV: " + String(SIV));
+      //Serial.println("SIV: " + String(SIV));
     }
     Serial.println(F("{DEBUG - LOOP SUCCESS: All Sensor Data Successfully Read! :>}"));
     return true;
@@ -379,6 +377,7 @@ String dataCompile()
   dataString += az;
   dataString += ",";
   dataString += speed;
+  return dataString;
 }
 void writeToSD()
 {
@@ -399,8 +398,8 @@ void writeToSD()
 
 void writeToHC12()
 {
-    digitalWrite(LED_BUILTIN, state); //REVIEW: What Is The Purpose Of This Line?
-    String dataString = dataCompile();
+    digitalWrite(LED_BUILTIN, state); //visual indicator
+    dataString = dataCompile();
     HC12.println(dataString);
     msLastRadio = millis();
     Serial.println("{DEBUG - LOOP SUCCESS: Data Successfully Transmitted To HC12 Radio! :>}");
