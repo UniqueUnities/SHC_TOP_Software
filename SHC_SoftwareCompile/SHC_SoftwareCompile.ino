@@ -27,17 +27,10 @@
   #include <SD.h> //Data Logging For SD Card
 
 //Pins & Sensor Set-Up (REVIEW: Review Commented Pins | Implement Details Of Each Pin):
-<<<<<<< HEAD
   #define SDA 4 //I2C manual configuration
   #define SCL 5 //I2C manual configuration
   #define txPin 0 //HC12 Radio
   #define rxPin 1 //HC12 Radio
-=======
-  #define SDA 4 //Sensors
-  #define SLC 5 //Sensors
-  #define txPin 1 //HC12 Radio
-  #define rxPin 0 //HC12 Radio
->>>>>>> 0442241bb91d1350fc493d27a2cbc0bc7d953dea
   #define HC12 Serial1  //HC12 Radio
   //#define SD_SO 16  //SD Card
   //#define DOOR 17 //This Will Detect A Signal And Send A Signal To Buzzer; Please Test, Please Test; Testing Is Good And Makes Me Happy :3
@@ -101,55 +94,13 @@
 
 //Global Variables:
   enum piracyStates State = PIRATE;
-<<<<<<< HEAD
-  //const float SEALEVELPRESSURE_HPA 1013.25  //REVIEW: Can This Be A Const Float?
-  int groundLevel = 0;  //REVIEW: Set Ground Level
-  const int levelError = 5; //REVIEW: Error Requires Improved Estimate
-  const int msPullRate = 100; //Time Between Sensor Data Pulls
-  int msLastPull = 0; //Sensor Data Pulls
-  const int msGNSSPullRate = 1000;  //Higher Rate Between GNSS Data Pulls To Limit SPI Traffic
-  int msLastGNSSPull = 0; //GNSS Data Pulls
-  const int msWriteRate = 100;
-  int msLastWrite = 0;
-  const int msRadioRate = 100;
-  int msLastRadio = 0;
-  const int msBlinkRate = 500;  //LED Blinking Rate
-  int msLastBlink = 0;  //LED Blinking
-  int stateLED = LOW;
-  int msLastNote = 0; //Buzzer Melody
-  float duration = 0; //Duration Of Buzzer Notes
-  bool buzzerSounded = false; //Ensures Buzzer Only Plays Once
-  bool itFlew = false;  //Aircraft Flew
   //bool state = false; //uart
-  double decimalLat=0;
-  double decimalLong=0;
-  double alt=0;
-  double pressure=0;
-  double temp=0;
-  double roll=0;
-  double pitch=0;
-  double yaw=0;
-  double ax=0;
-  double ay=0;
-  double az=0;
-  double speed=0;
-  const int BPM = 142;  //Mr. Sandman BPM
-  float notesArr[] {  //Mr. Sandman Notes
-    NOTE_C4, NOTE_E4, NOTE_G4, NOTE_B4, NOTE_A4, NOTE_G4, NOTE_E4, NOTE_C4, NOTE_D4, NOTE_F4, NOTE_A4, NOTE_C5, NOTE_B4, NOTE_C4, NOTE_E4, NOTE_G4, NOTE_B4, NOTE_A4, NOTE_G4, NOTE_E4, NOTE_C4, NOTE_D4, NOTE_F4, NOTE_A4, NOTE_C5, NOTE_B4, NOTE_G3, NOTE_A3, NOTE_B3, NOTE_A3, REST, REST, NOTE_B3, NOTE_B3, NOTE_A3, NOTE_B3, REST, NOTE_C4, NOTE_C4, NOTE_B3, NOTE_C4, NOTE_C4, REST, NOTE_B3, NOTE_F3, NOTE_F3, NOTE_E3, NOTE_F3, REST, REST, REST, NOTE_B3, NOTE_B3, NOTE_A3, NOTE_B3, REST, NOTE_A3, NOTE_E3, NOTE_E3, NOTE_D3, NOTE_E3, NOTE_G3, REST, NOTE_D4, NOTE_D4, NOTE_C4, NOTE_D4, NOTE_C4, NOTE_D4, NOTE_C4, NOTE_DS4, NOTE_DS4, NOTE_E4, NOTE_D4, REST, NOTE_B3, NOTE_A3, REST, REST, NOTE_B3, NOTE_B3, NOTE_A3, NOTE_B3, REST, REST, REST, NOTE_C4, NOTE_C4, NOTE_B3, NOTE_C4, NOTE_C4, REST, NOTE_B3, NOTE_F3, NOTE_F3, NOTE_E3, NOTE_F3, REST, REST, NOTE_D3, NOTE_F3, NOTE_A3, NOTE_C4, NOTE_C4, NOTE_C4, NOTE_D4, REST, NOTE_C4, NOTE_D4, NOTE_E4, NOTE_E4, NOTE_E4, NOTE_C4, NOTE_E4, NOTE_C4, NOTE_E4, NOTE_G4, NOTE_B4, NOTE_A4, NOTE_G4, NOTE_E4, NOTE_C4, NOTE_D4, NOTE_F4, NOTE_A4, NOTE_C5, NOTE_B4, NOTE_C4, NOTE_E4, NOTE_G4, NOTE_B4, NOTE_A4, NOTE_G4, NOTE_E4, NOTE_C4, NOTE_D4, NOTE_F4, NOTE_A4, NOTE_C5, NOTE_B4, NOTE_C5, NOTE_C5
-  };
-  int size = sizeof(notesArr) / sizeof(int);  //Length Of Notes Array
-  int noteSeq = 0;  //Current Note In Sequence
-  float durations[] { //Mr. Sandman Not Durations
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 2, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 8, 8, 4, 8, 2, 8, 8, 8, 4, 2, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 4, 8, 8, 8, 8, 4, 8, 8, 8, 8, 8, 4, 4, 4, 8, 8, 8, 8, 8, 8, 8, 4, 4, 8, 4, 8, 8, 4, 8, 2, 8, 8, 8, 4, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 4, 4, 8, 4, 8, 8, 8, 2, 4, 8, 8, 4, 4, 8, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 2, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 2, 1, 8
-  };
-=======
-  bool state = false; //uart
   int stateLED = LOW; //LED Starts As LOW (Off)
   const int levelError = 5; //Feet Off The Ground While Still Classified As Ground Level
   bool itFlew = false;  //Aircraft Flew
   bool musicTime = false; //Sand Deployment Doors Opened
   //Sensor Data:
-    const float SEALEVELPRESSURE_HPA 1013.25
+    //const float SEALEVELPRESSURE_HPA 1013.25 //never used
     double = storeTime = -9999999;
     double groundLevel = -9999999;
     double temperature = -9999999;
@@ -200,7 +151,6 @@
       4, 8, 8, 4, 8, 8, 8, 8, 8, 8, 4, 4, 4, 8, 8, 4, 8, 8, 8, 2, 0.25
     }
     const int etrSize = sizeof(etrNotesArr) / sizeof(int);
->>>>>>> 0442241bb91d1350fc493d27a2cbc0bc7d953dea
 
 void availSerial() //Wait For Serial Monitor Availability (REVIEW: Is This Needed?):
 {
@@ -433,14 +383,9 @@ bool writeToSD()
 }
 bool writeToHC12()
 {
-<<<<<<< HEAD
     //digitalWrite(LED_BUILTIN, state); //visual indicator
     String dataString = dataCompile();
     HC12.println(dataString);
-=======
-  digitalWrite(LED_BUILTIN, state); //Visual Indicator
-  String dataString = dataCompile();    HC12.println(dataString);
->>>>>>> 0442241bb91d1350fc493d27a2cbc0bc7d953dea
     msLastRadio = millis();
     Serial.println("{DEBUG - LOOP SUCCESS: Data Successfully Transmitted To HC12 Radio! :>}");
     //state != state;
