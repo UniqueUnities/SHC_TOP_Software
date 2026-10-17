@@ -18,14 +18,14 @@
   Notation Source: https://docs.arduino.cc/built-in-examples/digital/toneMelody/*/
 
 //Libraries (REVIEW: Why Are Each Included?):
-  #include <Wire.h>
-  #include <Adafruit_Sensor.h>
-  #include "Adafruit_BMP3XX.h"
-  #include <Adafruit_BNO055.h>
-  #include <utility/imumaths.h>
-  #include <SparkFun_u-blox_GNSS_Arduino_Library.h> //http://librarymanager/All#SparkFun_u-blox_GNSS
-  #include <SPI.h>
-  #include <SD.h>
+  #include <Wire.h> //core I2C communication
+  #include <Adafruit_Sensor.h> //altitude & pressure sensing
+  #include "Adafruit_BMP3XX.h" //altitude & pressure sensing specifically for the bmp388
+  #include <Adafruit_BNO055.h> //motion & orientation sensing specifically for the bno055
+  #include <utility/imumaths.h> //motion & orientation sensing
+  #include <SparkFun_u-blox_GNSS_Arduino_Library.h> //http://librarymanager/All#SparkFun_u-blox_GNSS location & GPS tracking
+  #include <SPI.h> //enables SPI communication for data logging
+  #include <SD.h> //data logging for the SD card
 
 //Pins & Sensor Set-Up (REVIEW: Review Commented Pins | Implement Details Of Each Pin):
   //#define SDA 4
@@ -117,6 +117,8 @@
   bool itFlew = false;  //Aircraft Flew
   long baud = 9600; //uart
   bool state = false; //uart
+  long rawLat=0;
+  long rawLong=0;
   double decimalLat=0;
   double decimalLong=0;
   double altitude=0;
@@ -125,9 +127,9 @@
   double roll=0;
   double pitch=0;
   double yaw=0;
-  double Ax=0;
-  double Ay=0;
-  double Az=0;
+  double ax=0;
+  double ay=0;
+  double az=0;
   double speed=0;
   const int BPM = 142;  //Mr. Sandman BPM
   float notesArr[] {  //Mr. Sandman Notes
@@ -289,9 +291,9 @@ bool readSensors()  //Read All Sensor Data
     bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
     if (orientationData.type == SENSOR_TYPE_ORIENTATION) {
       Serial.print("Orient:");
-      double yaw   = orientationData.orientation.x; 
-      double roll  = orientationData.orientation.y; 
-      double pitch = orientationData.orientation.z; 
+      yaw   = orientationData.orientation.x; 
+      roll  = orientationData.orientation.y; 
+      pitch = orientationData.orientation.z; 
       Serial.print("\tyaw= ");   Serial.print(yaw);
       Serial.print(" |\troll= ");  Serial.print(roll);
       Serial.print(" |\tpitch= "); Serial.println(pitch);
@@ -299,12 +301,12 @@ bool readSensors()  //Read All Sensor Data
 
   if(linearAccelData.type == SENSOR_TYPE_LINEAR_ACCELERATION) {
       Serial.print("Linear:");
-      double Ax = linearAccelData.acceleration.x;
-      double Ay = linearAccelData.acceleration.y;
-      double Az = linearAccelData.acceleration.z;
-      Serial.print("\tAx= ");   Serial.print(Ax);
-      Serial.print(" |\tAy= ");  Serial.print(Ay);
-      Serial.print(" |\tAz= ");  Serial.println(Az);
+      ax = linearAccelData.acceleration.x;
+      ay = linearAccelData.acceleration.y;
+      az = linearAccelData.acceleration.z;
+      Serial.print("\tAx= ");   Serial.print(ax);
+      Serial.print(" |\tAy= ");  Serial.print(ay);
+      Serial.print(" |\tAz= ");  Serial.println(az);
     }
     /*Additional Data Points (REVIEW: Either Include Or Remove):
       bno.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
@@ -330,14 +332,14 @@ bool readSensors()  //Read All Sensor Data
       //REVIEW: Implement System To Check For Reading Errors
       msLastGNSSPull = millis();
       //fetch raw scaling factors (Degrees * 10^-7)
-      long rawLat = myGNSS.getLatitude();
-      long rawLong = myGNSS.getLongitude();
+      rawLat = myGNSS.getLatitude();
+      rawLong = myGNSS.getLongitude();
       //convert to full 64-bit floating-point decimal degrees
-      double decimalLat = rawLat / 10000000.0;
-      double decimalLong = rawLong / 10000000.0;
+      decimalLat = rawLat / 10000000.0;
+      decimalLong = rawLong / 10000000.0;
 
-      double alt = myGNSS.getAltitude() / 1000.0; // Converts mm to Meters
-      double speed = (myGNSS.getGroundSpeed() / 1000.0) * 3.6; // Converts mm/s to km/h
+      alt = myGNSS.getAltitude() / 1000.0; // Converts mm to Meters
+      speed = (myGNSS.getGroundSpeed() / 1000.0) * 3.6; // Converts mm/s to km/h
       byte SIV = myGNSS.getSIV();
       Serial.println("Lat: " + String(decimalLat,7));
       Serial.println("Long: " + String(decimalLong,7));
@@ -370,11 +372,11 @@ String dataCompile()
   dataString += ",";
   dataString += yaw;
   dataString += ",";
-  dataString += Ax;
+  dataString += ax;
   dataString += ",";
-  dataString += Ay;
+  dataString += ay;
   dataString += ",";
-  dataString += Az;
+  dataString += az;
   dataString += ",";
   dataString += speed;
 }
