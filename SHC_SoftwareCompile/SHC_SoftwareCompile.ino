@@ -118,7 +118,7 @@
   bool state = false; //uart
   double decimalLat=0;
   double decimalLong=0;
-  double altitude=0;
+  double alt=0;
   double pressure=0;
   double temp=0;
   double roll=0;
@@ -254,7 +254,7 @@ void initHC12()
 
 void blinkLED() //Blink The LED; Does Not Perform Time-Related Functions
 {
-  if(stateLED = LOW) {
+  if(stateLED == LOW) {
     stateLED = HIGH;
     Serial.println("; Switching LED State (Off -> On)}");
   }
@@ -262,7 +262,7 @@ void blinkLED() //Blink The LED; Does Not Perform Time-Related Functions
     stateLED = LOW;
     Serial.println("; Switching LED State (On -> Off)}");
   }
-  digitalWrite(LED_WHITE, stateLED)
+  digitalWrite(LED_WHITE, stateLED);
 }
 
 bool readSensors()  //Read All Sensor Data
@@ -321,11 +321,10 @@ bool readSensors()  //Read All Sensor Data
       Serial.println("Gyro = " + String(gyro));
       Serial.println("Accel = " + String(accel));
       Serial.println("Mag = " + String(mag));*/
-    }   
     //Serial.println("{DEBUG - LOOP CALC: Time Since Last GNSS Data Pull " + String(millis()-msLastGNSSPull) + "ms}");
     if(millis() - msLastGNSSPull >= msGNSSPullRate) {
-      if(myGNSS.getPVT() == true){
-        if(myGNSS.getGnssFixOk() == true){
+      if(myGNSS.getPVT() == true){ //fetches the latest Position, Velocity, and Time (PVT) data packet from the GNSS module and updates the library's internal structure
+        if(myGNSS.getGnssFixOk() == true){ //checks whether your GPS/GNSS module has successfully locked onto enough satellites to provide a reliable, accurate location fix
           Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastGNSSPull) + "ms >= " + String(msGNSSPullRate) + "ms; Pulling Data...}");
           //REVIEW: Implement System To Check For Reading Errors
           msLastGNSSPull = millis();
@@ -338,7 +337,7 @@ bool readSensors()  //Read All Sensor Data
 
           alt = myGNSS.getAltitudeMSL() / 1000.0; // Converts mm to Meters
           speed = (myGNSS.getGroundSpeed() / 1000.0) * 3.6; // Converts mm/s to km/h
-          //byte SIV = myGNSS.getSIV();
+          //byte SIV = myGNSS.getSIV(); 
           Serial.println("Lat: " + String(decimalLat,7));
           Serial.println("Long: " + String(decimalLong,7));
           Serial.println("Alt (MSL): " + String(alt) + "m");
@@ -471,7 +470,7 @@ void loop() {
       break;
     case 2: //LAUNCH
       //REVIEW: Sensor Data
-      if(altitude > groundLevel) //REVIEW: In Flight; Altitude > Ground Level
+      if(altitude > groundLevel){//REVIEW: In Flight; Altitude > Ground Level
         STATE = FLIGHT;
         itFlew = true;
       }
@@ -486,7 +485,7 @@ void loop() {
     case 4: //LANDED
       //REVIEW: Sensor Data
       if(false) { //REVIEW: Stopped Moving
-        STATE = CAPTAIN
+        STATE = CAPTAIN;
       }
       break;
     case 5: //CAPTAIN
@@ -505,7 +504,7 @@ void loop() {
     if(millis() - msLastPull >= msPullRate) {
       Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastPull) + "ms >= " + String(msPullRate) + "ms; Pulling BMP388 & BNO055 Sensor Data...}");
       if(!readSensors())
-        continue;
+        return;
       msLastPull = millis();
     }   
     if(millis() - msLastGNSSPull >= msGNSSPullRate) {
