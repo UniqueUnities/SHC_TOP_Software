@@ -28,8 +28,8 @@
   #include <SD.h> //data logging for the SD card
 
 //Pins & Sensor Set-Up (REVIEW: Review Commented Pins | Implement Details Of Each Pin):
-  //#define SDA 4
-  //#define SLC 5
+  #define SDA 4 //I2C manual configuration
+  #define SCL 5 //I2C manual configuration
   #define txPin 0 //HC12 Radio
   #define rxPin 1 //HC12 Radio
   #define HC12 Serial1  //HC12 Radio
@@ -115,7 +115,7 @@
   float duration = 0; //Duration Of Buzzer Notes
   bool buzzerSounded = false; //Ensures Buzzer Only Plays Once
   bool itFlew = false;  //Aircraft Flew
-  bool state = false; //uart
+  //bool state = false; //uart
   double decimalLat=0;
   double decimalLong=0;
   double alt=0;
@@ -158,11 +158,11 @@ void initPinModes() //Initialize Pin Modes
   pinMode(txPin, OUTPUT); //Define Pin Mode For HC12 tx
   //spiPort.begin();
   Wire.begin();
-  /*Set-Up SDA & SCL Wires (REVIEW: Is This Needed?):
-    Serial.println("{DEBUG - TEST: Initializing SDA & SCL Wires...}");
-    Wire.setSDA(SDA);
-    Wire.setSCL(SCL);
-    Serial.println("{DEBUG - SUCCESS: Set-Up SDA & SCL Wires! :>}");*/
+  //Set-Up SDA & SCL Wires (REVIEW: Is This Needed?):
+  Serial.println("{DEBUG - TEST: Initializing SDA & SCL Wires...}");
+  Wire.setSDA(SDA);
+  Wire.setSCL(SCL);
+  Serial.println("{DEBUG - SUCCESS: Set-Up SDA & SCL Wires! :>}");
   Serial.println(F("{DEBUG - SETUP SUCCESS: Pin Modes Initialized! :>}"));
 }
 
@@ -399,12 +399,12 @@ void writeToSD()
 
 void writeToHC12()
 {
-    digitalWrite(LED_BUILTIN, state); //visual indicator
+    //digitalWrite(LED_BUILTIN, state); //visual indicator
     String dataString = dataCompile();
     HC12.println(dataString);
     msLastRadio = millis();
     Serial.println("{DEBUG - LOOP SUCCESS: Data Successfully Transmitted To HC12 Radio! :>}");
-    state != state;
+    //state != state;
     /*Recieve From Ground Station:
       if(HC12.available() > 0) {
         Serial.print(millis());
