@@ -97,7 +97,7 @@
 
 //Global Variables (REVIEW: Ensure Descriptive Names & Implement Comments):
   enum piracyStates State = PIRATE;
-  const float SEALEVELPRESSURE_HPA 1013.25  //REVIEW: Can This Be A Const Float?
+  //const float SEALEVELPRESSURE_HPA 1013.25  //REVIEW: Can This Be A Const Float?
   int groundLevel = 0;  //REVIEW: Set Ground Level
   const int levelError = 5; //REVIEW: Error Requires Improved Estimate
   const int msPullRate = 100; //Time Between Sensor Data Pulls
@@ -116,8 +116,6 @@
   bool buzzerSounded = false; //Ensures Buzzer Only Plays Once
   bool itFlew = false;  //Aircraft Flew
   bool state = false; //uart
-  long rawLat=0;
-  long rawLong=0;
   double decimalLat=0;
   double decimalLong=0;
   double altitude=0;
@@ -326,24 +324,28 @@ bool readSensors()  //Read All Sensor Data
     }   
     //Serial.println("{DEBUG - LOOP CALC: Time Since Last GNSS Data Pull " + String(millis()-msLastGNSSPull) + "ms}");
     if(millis() - msLastGNSSPull >= msGNSSPullRate) {
-      Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastGNSSPull) + "ms >= " + String(msGNSSPullRate) + "ms; Pulling Data...}");
-      //REVIEW: Implement System To Check For Reading Errors
-      msLastGNSSPull = millis();
-      //fetch raw scaling factors (Degrees * 10^-7)
-      rawLat = myGNSS.getLatitude();
-      rawLong = myGNSS.getLongitude();
-      //convert to full 64-bit floating-point decimal degrees
-      decimalLat = rawLat / 10000000.0;
-      decimalLong = rawLong / 10000000.0;
+      if(myGNSS.getPVT() == true){
+        if(myGNSS.getGnssFixOk() == true){
+          Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastGNSSPull) + "ms >= " + String(msGNSSPullRate) + "ms; Pulling Data...}");
+          //REVIEW: Implement System To Check For Reading Errors
+          msLastGNSSPull = millis();
+          //fetch raw scaling factors (Degrees * 10^-7)
+          long rawLat = myGNSS.getLatitude();
+          long rawLong = myGNSS.getLongitude();
+          //convert to full 64-bit floating-point decimal degrees
+          decimalLat = rawLat / 10000000.0;
+          decimalLong = rawLong / 10000000.0;
 
-      alt = myGNSS.getAltitude() / 1000.0; // Converts mm to Meters
-      speed = (myGNSS.getGroundSpeed() / 1000.0) * 3.6; // Converts mm/s to km/h
-      //byte SIV = myGNSS.getSIV();
-      Serial.println("Lat: " + String(decimalLat,7));
-      Serial.println("Long: " + String(decimalLong,7));
-      Serial.println("Alt: " + String(alt) + "m");
-      Serial.println("Speed: " + String(speed) + "(km/h)");
-      //Serial.println("SIV: " + String(SIV));
+          alt = myGNSS.getAltitudeMSL() / 1000.0; // Converts mm to Meters
+          speed = (myGNSS.getGroundSpeed() / 1000.0) * 3.6; // Converts mm/s to km/h
+          //byte SIV = myGNSS.getSIV();
+          Serial.println("Lat: " + String(decimalLat,7));
+          Serial.println("Long: " + String(decimalLong,7));
+          Serial.println("Alt (MSL): " + String(alt) + "m");
+          Serial.println("Speed: " + String(speed) + "(km/h)");
+          //Serial.println("SIV: " + String(SIV));
+        }
+      }
     }
     Serial.println(F("{DEBUG - LOOP SUCCESS: All Sensor Data Successfully Read! :>}"));
     return true;
@@ -352,36 +354,36 @@ bool readSensors()  //Read All Sensor Data
 String dataCompile()
 {
   String dataString = "";
-  dataString += time;
+  dataString += String(millis());
   dataString += ",";
-  dataString += longitude;
+  dataString += String(decimalLong,6);
   dataString += ",";
-  dataString += latitude;
+  dataString += String(decimalLat,6);
   dataString += ",";
-  dataString += altitude;
+  dataString += String(alt,2);
   dataString += ",";
-  dataString += pressure;
+  dataString += String(pressure,2);
   dataString += ",";
-  dataString += temperature;
+  dataString += String(temp,2);
   dataString += ",";
-  dataString += roll;
+  dataString += String(roll,2);
   dataString += ",";
-  dataString += pitch;
+  dataString += String(pitch,2);
   dataString += ",";
-  dataString += yaw;
+  dataString += String(yaw,2);
   dataString += ",";
-  dataString += ax;
+  dataString += String(ax,2);
   dataString += ",";
-  dataString += ay;
+  dataString += String(ay,2);
   dataString += ",";
-  dataString += az;
+  dataString += String(az,2);
   dataString += ",";
-  dataString += speed;
+  dataString += String(speed,2);
   return dataString;
 }
 void writeToSD()
 {
-  datsString = dataCompile(); //String For Logging Data
+  String dataString = dataCompile(); //String For Logging Data
   Serial.println("{DEBUG - LOOP CHANGE: Data Compiled; Now Writing In SD Card...}");
   File dataFile = SD.open("datalog.csv", FILE_WRITE); //Open File (Only One File Can Open At A Time)
   if(dataFile) { //If File Is Available, Write To It
@@ -392,14 +394,14 @@ void writeToSD()
     Serial.println("{DEBUG - LOOP SUCCESS: Data Successfully Written! :>}");
   }
   else { //If File Is Not Open, Show Error
-    Serial.println("{DEBUG - LOOP ERROR: Error Opening datalog.txt. :<}");
+    Serial.println("{DEBUG - LOOP ERROR: Error Opening datalog.csv. :<}");
   }
 }
 
 void writeToHC12()
 {
     digitalWrite(LED_BUILTIN, state); //visual indicator
-    dataString = dataCompile();
+    String dataString = dataCompile();
     HC12.println(dataString);
     msLastRadio = millis();
     Serial.println("{DEBUG - LOOP SUCCESS: Data Successfully Transmitted To HC12 Radio! :>}");
