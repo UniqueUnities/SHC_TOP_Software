@@ -106,8 +106,8 @@
     double temperature = -9999999;
     double pressure = -9999999;
     double altitude = -9999999;
-    double deciLat = -9999999;
-    double deciLong = -9999999;
+    double decimalLat = -9999999;
+    double decimalLong = -9999999;
     double roll = -9999999;
     double pitch = -9999999;
     double yaw = -9999999;
