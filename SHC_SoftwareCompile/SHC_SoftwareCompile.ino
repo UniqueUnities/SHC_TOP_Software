@@ -233,15 +233,26 @@ void initSD() //Initialize SD Card
         return;
       }*/
 
-    if(!SD.begin(chipSelect)) {
-      Serial.println(F("{DEBUG - SETUP ERROR: SD Card Initalization Failed. :<}"));
-    }
+  if(!SD.begin(chipSelect)) {
+    Serial.println(F("{DEBUG - SETUP ERROR: SD Card Initalization Failed. :<}"));
+  }
     /*Determine If Card Present (REVIEW: Should This Be Commented?):
       if (!sdInitialized) {
         Serial.println("{DEBUG - SETUP ERROR: Card Failed Or Not Present. :<}");
         return; //End Set-Up; Nothing Can Be Stored | REVIEW: Should We Implement A Loop To Ensure Proper Set-Up?
       }*/
-    Serial.println(F("{DEBUG - SETUP SUCCESS: SD Card Initialization Successful! :>}"));  
+  Serial.println(F("{DEBUG - SETUP SUCCESS: SD Card Initialization Successful! :>}")); 
+  File dataFile = SD.open("datalog.csv", FILE_WRITE); //Open File (Only One File Can Open At A Time)
+  String dataString="Time,Longitude,Latitude,Altitude,Pressure,Temperature,Roll,Pitch,Yaw,Ax,Ay,Az,Speed";
+  if(dataFile) { //If File Is Available, Write To It
+    dataFile.println(dataString);
+    dataFile.close();
+    Serial.println(dataString); //Print To Serial Port
+    Serial.println("{DEBUG - Headers Successfully Written! :>}");
+  }
+  else { //If File Is Not Open, Show Error
+    Serial.println("{DEBUG - LOOP ERROR: Error Opening datalog.csv. :<}");
+  }
 }
 void initHC12()
 {
@@ -336,26 +347,27 @@ bool readGNSS()
       long rawLong = myGNSS.getLongitude();
       decimalLat = rawLat / 10000000.0;
       decimalLong = rawLong / 10000000.0;
-      alt = myGNSS.getAltitudeMSL() / 1000.0; // Converts mm to Meters
+      altitude = myGNSS.getAltitudeMSL() / 1000.0; // Converts mm to Meters
       speed = (myGNSS.getGroundSpeed() / 1000.0) * 3.6; // Converts mm/s to km/h
       //byte SIV = myGNSS.getSIV();
       Serial.println("Lat: " + String(decimalLat,7));
       Serial.println("Long: " + String(decimalLong,7));
-      Serial.println("Alt (MSL): " + String(alt) + "m");
+      Serial.println("Alt (MSL): " + String(altitude) + "m");
       Serial.println("Speed: " + String(speed) + "(km/h)");
       return true;
     }
   }
   return false;
 }
-void dataCompile()
+String dataCompile()
 {
+  String dataString="";
   dataString = String(storeTime) + ",";
   dataString += String(decimalLong,6) + ",";
   dataString += String(decimalLat,6) + ",";
-  dataString += String(alt,2) + ",";
+  dataString += String(altitude,2) + ",";
   dataString += String(pressure,2) + ",";
-  dataString += String(temp,2) + ",";
+  dataString += String(temperature,2) + ",";
   dataString += String(roll,2) + ",";
   dataString += String(pitch,2) + ",";
   dataString += String(yaw,2) + ",";
@@ -363,6 +375,7 @@ void dataCompile()
   dataString += String(accelY,2) + ",";
   dataString += String(accelZ,2) + ",";
   dataString += String(speed,2);
+  return dataString;
 }
 bool writeToSD()
 {
