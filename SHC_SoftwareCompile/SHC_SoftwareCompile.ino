@@ -243,7 +243,7 @@ void initSD() //Initialize SD Card
       }*/
   Serial.println(F("{DEBUG - SETUP SUCCESS: SD Card Initialization Successful! :>}")); 
   File dataFile = SD.open("datalog.csv", FILE_WRITE); //Open File (Only One File Can Open At A Time)
-  String dataString="Time,Longitude,Latitude,Altitude,Pressure,Temperature,Roll,Pitch,Yaw,Ax,Ay,Az,Speed";
+  dataString="Time,Longitude,Latitude,Altitude,Pressure,Temperature,Roll,Pitch,Yaw,Ax,Ay,Az,Speed";
   if(dataFile) { //If File Is Available, Write To It
     dataFile.println(dataString);
     dataFile.close();
@@ -359,9 +359,8 @@ bool readGNSS()
   }
   return false;
 }
-String dataCompile()
+void dataCompile()
 {
-  String dataString="";
   dataString = String(storeTime) + ",";
   dataString += String(decimalLong,6) + ",";
   dataString += String(decimalLat,6) + ",";
@@ -375,11 +374,11 @@ String dataCompile()
   dataString += String(accelY,2) + ",";
   dataString += String(accelZ,2) + ",";
   dataString += String(speed,2);
-  return dataString;
 }
 bool writeToSD()
 {
   Serial.println("{DEBUG - LOOP CHANGE: Data Compiled; Now Writing In SD Card...}");
+  dataCompile();
   File dataFile = SD.open("datalog.csv", FILE_WRITE); //Open File (Only One File Can Open At A Time)
   if(dataFile) { //If File Is Available, Write To It
     msLastWrite = millis();
@@ -397,7 +396,7 @@ bool writeToSD()
 bool writeToHC12()
 {
     //digitalWrite(LED_BUILTIN, state); //visual indicator
-    String dataString = dataCompile();
+    dataCompile();
     HC12.println(dataString);
     msLastRadio = millis();
     Serial.println("{DEBUG - LOOP SUCCESS: Data Successfully Transmitted To HC12 Radio! :>}");
