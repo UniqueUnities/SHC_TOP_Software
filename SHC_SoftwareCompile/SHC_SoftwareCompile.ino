@@ -83,6 +83,7 @@
   //bool musicTime = false; //Sand Deployment Doors Opened
   //Sensor Data:
     //const float SEALEVELPRESSURE_HPA 1013.25 //never used
+<<<<<<< HEAD
     double = storeTime = -1;
     double groundLevel = -1;
     double temperature = -1;
@@ -97,6 +98,22 @@
     double accelY = -1;
     double accelZ = -1;
     double speed = -1;
+=======
+    double = storeTime = -9999999;
+    double groundLevel = -9999999;
+    double temperature = -9999999;
+    double pressure = -9999999;
+    double altitude = -9999999;
+    double decimalLat = -9999999;
+    double decimalLong = -9999999;
+    double roll = -9999999;
+    double pitch = -9999999;
+    double yaw = -9999999;
+    double accelX = -9999999;
+    double accelY = -9999999;
+    double accelZ = -9999999;
+    double speed = -9999999;
+>>>>>>> c38c4a316aed61b0cb48102dd8e31057a69aaa05
     String dataString = "";
   //Conditional Cycles:
     /*const int msBMPPullRate = 100; //Time Between BMP388 Data Pulls
@@ -192,9 +209,43 @@ void initGNSS() //GNSS Initialization & Error-Checking
 /*void initSD() //Initialize SD Card
 {
   Serial.println(F("{DEBUG - SETUP TEST: Initalizing SD Card...}"));
+<<<<<<< HEAD
   if(!SD.begin(chipSelect)) {
     Serial.println(F("{DEBUG - SETUP ERROR: SD Card Initalization Failed. :<}"));
   }
+=======
+  /*SD Card Initalization (REVIEW: Should This Be Commented?):
+    bool sdInitialized = false;
+    if(RP_CLK_GPIO >= 0) { //No Special Requirements On Pin Locations; PIO Programmed
+      sdInitialized = SD.begin(RP_CLK_GPIO, RP_CMD_GPIO, RP_DAT0_GPIO);
+    }
+    else { //Ensure SPI Pinout SD Card Connected To Is Configured Properly & Select Correct SPI From _MISO Pin For RP2040
+      if(_MISO == 0 || _MISO == 4 || _MISO == 16) {
+        SPI.setRX(_MISO);
+        SPI.setTX(_MOSI);
+        SPI.setSCK(_SCK);
+        sdInitialized = SD.begin(_CS);
+      }
+      else if (_MISO == 8 || _MISO == 12) {
+        SPI1.setRX(_MISO);
+        SPI1.setTX(_MOSI);
+        SPI1.setSCK(_SCK);
+        sdInitialized = SD.begin(_CS, SPI1);
+      }
+      else {
+        Serial.println(F("ERROR: Unknown SPI Configuration"));
+        return;
+      }*/
+
+  if(!SD.begin(chipSelect)) {
+    Serial.println(F("{DEBUG - SETUP ERROR: SD Card Initalization Failed. :<}"));
+  }
+    /*Determine If Card Present (REVIEW: Should This Be Commented?):
+      if (!sdInitialized) {
+        Serial.println("{DEBUG - SETUP ERROR: Card Failed Or Not Present. :<}");
+        return; //End Set-Up; Nothing Can Be Stored | REVIEW: Should We Implement A Loop To Ensure Proper Set-Up?
+      }*/
+>>>>>>> c38c4a316aed61b0cb48102dd8e31057a69aaa05
   Serial.println(F("{DEBUG - SETUP SUCCESS: SD Card Initialization Successful! :>}")); 
   File dataFile = SD.open("datalog.csv", FILE_WRITE); //Open File (Only One File Can Open At A Time)
   dataString="Time,Longitude,Latitude,Altitude,Pressure,Temperature,Roll,Pitch,Yaw,Ax,Ay,Az,Speed";
@@ -207,7 +258,11 @@ void initGNSS() //GNSS Initialization & Error-Checking
   else { //If File Is Not Open, Show Error
     Serial.println("{DEBUG - LOOP ERROR: Error Opening datalog.csv. :<}");
   }
+<<<<<<< HEAD
 }*/
+=======
+}
+>>>>>>> c38c4a316aed61b0cb48102dd8e31057a69aaa05
 void initHC12()
 {
   Serial.println(F("{DEBUG - SETUP TEST: Initializing HC12 Serial Link...}"));
@@ -311,6 +366,7 @@ bool readBNO055()
 //}
 /*bool readGNSS()
 {
+<<<<<<< HEAD
   if(myGNSS.getPVT() && myGNSS.getGnssFixOk()) {
     long rawLat = myGNSS.getLatitude();
     long rawLong = myGNSS.getLongitude();
@@ -320,6 +376,23 @@ bool readBNO055()
     speed = (myGNSS.getGroundSpeed() / 1000.0) * 3.6; // Converts mm/s to km/h
     if(groundLevel < 0) {
       groundLevel = myGNSS.getAltitudeMSL() / 1000.0;
+=======
+  if(myGNSS.getPVT() == true) {
+    if(myGNSS.getGnssFixOk() == true) {
+      //REVIEW: Implement System To Check For Reading Errors
+      long rawLat = myGNSS.getLatitude();
+      long rawLong = myGNSS.getLongitude();
+      decimalLat = rawLat / 10000000.0;
+      decimalLong = rawLong / 10000000.0;
+      altitude = myGNSS.getAltitudeMSL() / 1000.0; // Converts mm to Meters
+      speed = (myGNSS.getGroundSpeed() / 1000.0) * 3.6; // Converts mm/s to km/h
+      //byte SIV = myGNSS.getSIV();
+      Serial.println("Lat: " + String(decimalLat,7));
+      Serial.println("Long: " + String(decimalLong,7));
+      Serial.println("Alt (MSL): " + String(altitude) + "m");
+      Serial.println("Speed: " + String(speed) + "(km/h)");
+      return true;
+>>>>>>> c38c4a316aed61b0cb48102dd8e31057a69aaa05
     }
     //byte SIV = myGNSS.getSIV();
     Serial.println("Lat: " + String(decimalLat,7));
