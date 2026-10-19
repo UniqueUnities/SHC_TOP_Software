@@ -24,12 +24,6 @@ void setup() {
 
   Serial.print("Serial link available... ");
   HC12.begin(9600);
-  if (HC12.isListening()) {
-    Serial.println("OK");
-  } else {
-    Serial.println("NOK");
-  }
-
   Serial.println("initialization done.");
 }
 
