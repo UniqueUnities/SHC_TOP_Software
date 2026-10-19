@@ -209,7 +209,18 @@ void initSD() //Initialize SD Card
 void headerSD() //Write SD Card File Headers; Organize Data
 {
   debugView("headerSD");
-  File dataFile = SD.open("datalog.csv", FILE_WRITE); //Open File (Only One File Can Open At A Time)
+  int fileNum = 1;
+  while (true) {
+    // Dynamically create a name like "flight_0.csv", "flight_1.csv", etc.
+    sprintf(fileName, "datalog%d.csv", fileNum);
+    
+    // If this file number doesn't exist yet, we break out and use it!
+    if (!SD.exists(fileName)) {
+      break; 
+    }
+    fileNum++; // If it does exist, check the next number
+  }
+  File dataFile = SD.open(fileName, FILE_WRITE); //Open File (Only One File Can Open At A Time)
   if(dataFile) { //If File Is Available, Write To It
     dataFile.println("Time,Longitude,Latitude,Altitude,Pressure,Temperature,Roll,Pitch,Yaw,Ax,Ay,Az,Speed");
     dataFile.close();
@@ -341,17 +352,6 @@ void dataCompile()  //Compile All Sensor Data Into A String
 bool writeToSD()  //Send Data To SD Card
 {
   debugView("writeToSD");
-  int fileNum = 0;
-  while (true) {
-    // Dynamically create a name like "flight_0.csv", "flight_1.csv", etc.
-    sprintf(fileName, "datalog_%d.csv", fileNum);
-    
-    // If this file number doesn't exist yet, we break out and use it!
-    if (!SD.exists(fileName)) {
-      break; 
-    }
-    fileNum++; // If it does exist, check the next number
-  }
   File dataFile = SD.open(fileName, FILE_WRITE); //Open File (Only One File Can Open At A Time)
   if(dataFile) { //If File Is Available, Write To It
     dataFile.println(dataString_SD);
