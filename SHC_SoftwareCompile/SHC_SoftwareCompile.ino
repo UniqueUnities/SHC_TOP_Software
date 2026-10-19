@@ -3,34 +3,34 @@
   Buzzer Notation Source: https://docs.arduino.cc/built-in-examples/digital/toneMelody/*/
 
 //Libraries:
-  #include <Wire.h> //Core I2C Communication
+  /*#include <Wire.h> //Core I2C Communication
   #include <Adafruit_Sensor.h>  //General Altitude & Pressure Sensing
   #include "Adafruit_BMP3XX.h"  //BMP388 - Altitude & Pressure Sensing
   #include <Adafruit_BNO055.h>  //BNO055 - Motion & Orientation Sensing
   #include <utility/imumaths.h> //Motion & Orientation Sensing
   #include <SparkFun_u-blox_GNSS_Arduino_Library.h> //Location & GPS Tracking | http://librarymanager/All#SparkFun_u-blox_GNSS
   #include <SPI.h>  //Enables SPI Communication For Data Logging
-  #include <SD.h> //Data Logging For SD Card
+  #include <SD.h> //Data Logging For SD Card*/
 
 //Pins & Sensor Set-Up (  //HC12 Radio Does Not Need Configured Pins, But Pins Are: txPin 0 rxPin 1 HC12 Serial1):
-  #define SDA 4 //I2C Manual Configuration
+  /*#define SDA 4 //I2C Manual Configuration
   #define SCL 5 //I2C Manual Configuration
   #define DOOR_PIN 17 //This Will Detect A Signal And Send A Signal To Buzzer
   #define chipSelect 20 //Only Neccessary Pin For SD Card | Other Pins: SD_SO 16 SD_CLK 18 SD_SI 19*/
   #define BUZZER_PIN 21 //Connect Buzzer
-  #define LED_WHITE 22  //Connect Blinking LED
+  /*#define LED_WHITE 22  //Connect Blinking LED
   SFE_UBLOX_GNSS myGNSS;  //Set-Up GNSS
   Adafruit_BMP3XX bmp;  //Set-Up BMP3XX
-  Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28, &Wire); //Check I2C Device Address
+  Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28, &Wire); //Check I2C Device Address*/
 
 //Global Variables:
   //String STATE = "PIRATE";
-  bool onLED = false; //LED Starts As LOW (Off)
+  //bool onLED = false; //LED Starts As LOW (Off)
   //const int levelError = 5; //Meters Off The Ground While Still Classified As Ground Level
   //bool itFlew = false;  //Did The Aircraft Fly? (Did It Ever Enter FLIGHT?)
   bool songTime = true; //Did The Sand Deployment Doors Open? (Did The PICO Recieve Signal From Door Pin?)
   //Sensor Data (-999999 As Error-Handling Value):
-    double storeTime = -999999;
+    /*double storeTime = -999999;
     double groundLevel = -999999;
     double temperature = -999999;
     double pressure = -999999;
@@ -159,16 +159,16 @@ void debugView(String debugType)  //Viewing Debug Messages
 void initPinModes() //Set-Up: Pins
 {
   debugView("initPins");
-  Serial.begin(9600); //Sets SD Card
-  Serial1.begin(9600);  //Sets HC12 Radio; Other Pins: pinMode(rxPin, INPUT); pinMode(txPin, OUTPUT);
+  /*Serial.begin(9600); //Sets SD Card
+  Serial1.begin(9600);  //Sets HC12 Radio; Other Pins: pinMode(rxPin, INPUT); pinMode(txPin, OUTPUT);*/
   pinMode(BUZZER_PIN, OUTPUT);  //Determine Pin Type For Buzzer (OUTPUT - Higher Voltage)
-  pinMode(LED_WHITE, OUTPUT); //Determine Pin Type For Blinking LED (OUTPUT - Higher Voltage)
+  /*pinMode(LED_WHITE, OUTPUT); //Determine Pin Type For Blinking LED (OUTPUT - Higher Voltage)
   Wire.begin();
   Wire.setSDA(SDA);
   Wire.setSCL(SCL);
-  debugView("initPins_SUCCESS");
+  debugView("initPins_SUCCESS");*/
 }
-void initBMP() //BMP388 Initialization & Error-Checking
+/*void initBMP() //BMP388 Initialization & Error-Checking
 { 
   debugView("initBMP");
   if (!bmp.begin_I2C()) { //Testing Hardware I2C Mode
@@ -208,18 +208,7 @@ void initSD() //Initialize SD Card
 void headerSD() //Write SD Card File Headers; Organize Data
 {
   debugView("headerSD");
-  int fileNum = 1;
-  while (true) {
-    // Dynamically create a name like "flight_0.csv", "flight_1.csv", etc.
-    sprintf(fileName, "datalog%d.csv", fileNum);
-    
-    // If this file number doesn't exist yet, we break out and use it!
-    if (!SD.exists(fileName)) {
-      break; 
-    }
-    fileNum++; // If it does exist, check the next number
-  }
-  File dataFile = SD.open(fileName, FILE_WRITE); //Open File (Only One File Can Open At A Time)
+  File dataFile = SD.open("datalog.csv", FILE_WRITE); //Open File (Only One File Can Open At A Time)
   if(dataFile) { //If File Is Available, Write To It
     dataFile.println("Time,Longitude,Latitude,Altitude,Pressure,Temperature,Roll,Pitch,Yaw,Ax,Ay,Az,Speed");
     dataFile.close();
@@ -238,8 +227,8 @@ void initHC12()
   else {
     debugView("initHC12_SUCCESS");
   }*/
-}
-void blinkLED() //Blink The LED; Does Not Perform Time-Related Functions
+//}*/
+/*void blinkLED() //Blink The LED; Does Not Perform Time-Related Functions
 {
   if(!onLED) {  //If LED Off, Turn On
     debugView("blinkLED_ON");
@@ -250,7 +239,7 @@ void blinkLED() //Blink The LED; Does Not Perform Time-Related Functions
     digitalWrite(LED_WHITE, LOW);
   }
   onLED = !onLED; //LED State Has Flipped, So Edit Accordingly!
-}
+}*/
 void playNote() { //Play Current Note, And Prepare For The Next
   debugView("playNote");
   noTone(BUZZER_PIN); //Stop Playing On The Buzzer
@@ -274,7 +263,7 @@ void playNote() { //Play Current Note, And Prepare For The Next
   }
   noteSeq++;
 }
-bool readBMP()  //Read Data From BMP388
+/*bool readBMP()  //Read Data From BMP388
 {
   debugView("readBMP");
   if(!bmp.performReading()) { //Ensure BMP388 Reads Correctly
@@ -351,7 +340,7 @@ void dataCompile()  //Compile All Sensor Data Into A String
 bool writeToSD()  //Send Data To SD Card
 {
   debugView("writeToSD");
-  File dataFile = SD.open(fileName, FILE_WRITE); //Open File (Only One File Can Open At A Time)
+  File dataFile = SD.open("datalog.csv", FILE_WRITE); //Open File (Only One File Can Open At A Time)
   if(dataFile) { //If File Is Available, Write To It
     dataFile.println(dataString_SD);
     dataFile.close();
@@ -372,10 +361,10 @@ void setup() {
   //STATE = "STANDBY"; 
   debugView("SETUP");
   initPinModes();
-  initBMP();
-  initBNO(); 
-  initGNSS();
-  if(myGNSS.getPVT() && myGNSS.getGnssFixOk()) {  //Attempt To Set Ground Level
+  //initBMP();
+  //initBNO(); 
+  //initGNSS();
+  /*if(myGNSS.getPVT() && myGNSS.getGnssFixOk()) {  //Attempt To Set Ground Level
     groundLevel = myGNSS.getAltitudeMSL() / 1000.0;
     debugView("set_groundLevel");
   }
@@ -384,14 +373,14 @@ void setup() {
   }
   initSD();
   headerSD();
-  initHC12();
+  initHC12();*/
   debugView("SETUP_SUCCESS");
 }
 
 void loop() {
   
   //Aircraft States: //CAP: Below Ground Level, Above 300ft | Negative Time
-    if((altitude >= groundLevel - levelError && altitude <= groundLevel + levelError) && !itFlew) //On Ground, But Has Not Yet Flown
+    /*if((altitude >= groundLevel - levelError && altitude <= groundLevel + levelError) && !itFlew) //On Ground, But Has Not Yet Flown
       STATE = "LAUNCH";
     else if(altitude > groundLevel) //If In Air
       STATE = "FLIGHT";
@@ -401,7 +390,7 @@ void loop() {
     if(millis() - msLastBlink >= msBlinkRate) {
       blinkLED();
       msLastBlink = millis();
-    }
+    }*/
   //Buzzer Melody:
     if(!songTime && digitalRead(DOOR_PIN)) {  //"digitalRead(DOOR_PIN)" Is An Attempt To Read From A PWM Signal From The Controller; Find Some Way To Read From The PWM, And Use That Instead. The Buzzer Code Works, And Should Start Playing Once Signal Is Recieved
       songTime = true;
@@ -412,7 +401,7 @@ void loop() {
       msLastNote = millis();
     }
   //Output Sensor Data:
-    storeTime = millis();
+    /*storeTime = millis();
     if(millis() - msLastBMPPull >= msBMPPullRate) {
       if(readBMP())
         msLastBMPPull = millis();
@@ -434,5 +423,5 @@ void loop() {
     if(millis() - msLastRadio >= msRadioRate) {
       if(writeToHC12())
         msLastRadio = millis();
-    }
+    }*/
 }
