@@ -392,14 +392,14 @@ void loop() {
       msLastBlink = millis();
     }*/
   //Buzzer Melody:
-    /*if(!songTime && digitalRead(DOOR_PIN)) {
+    if(!songTime && digitalRead(DOOR_PIN)) {  //"digitalRead(DOOR_PIN)" Is An Attempt To Read From A PWM Signal From The Controller; Find Some Way To Read From The PWM, And Use That Instead. The Buzzer Code Works, And Should Start Playing Once Signal Is Recieved
       songTime = true;
       debugView("beginBuzzer");
-    }*/
-    /*if((songTime) && (millis() - msLastNote >= noteDuration * 1.30)) {
+    }
+    if((songTime) && (millis() - msLastNote >= noteDuration * 1.30)) {
       playNote();
       msLastNote = millis();
-    }*/
+    }
   //Output Sensor Data:
     /*storeTime = millis();
     if(millis() - msLastBMPPull >= msBMPPullRate) {
