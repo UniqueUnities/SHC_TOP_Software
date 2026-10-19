@@ -46,6 +46,7 @@
     double speed = -999999;
     String dataString = ""; //String Used For Data Storage
     String dataString_SD = ""; //String Used For SD Card Data Transmission
+    char fileName[20];
   //Conditional Cycles (Rather Than Delays, The Miliseconds Run Between Each Process Type):
     const int msBMPPullRate = 200;
     int msLastBMPPull = 0;
@@ -58,7 +59,7 @@
     const int msRadioRate = 200;
     int msLastRadio = 0;
     const int msBlinkRate = 500;  //Required To Be 500ms
-    int msLastBlink = 0;*/
+    int msLastBlink = 0;
   //Music (Songs: Mr. Sandman & Enter Sandman):
     float noteDuration = 0; //Length Of Note Playing
     int msLastNote = 0; //Time Since Last Note Played
@@ -367,7 +368,7 @@ bool writeToHC12()
   debugView("writeToHC12");
   Serial1.println(dataString);  //Print To HC12 Radio
   return true;
-}*/
+}
 void setup() {
   //STATE = "STANDBY"; 
   debugView("SETUP");
@@ -391,12 +392,12 @@ void setup() {
 void loop() {
   
   //Aircraft States: //CAP: Below Ground Level, Above 300ft | Negative Time
-    if((altitude >= groundLevel - levelError && altitude <= groundLevel + levelError) && !itFlew) //On Ground, But Has Not Yet Flown
+    /*(if((altitude >= groundLevel - levelError && altitude <= groundLevel + levelError) && !itFlew) //On Ground, But Has Not Yet Flown
       STATE = "LAUNCH";
     else if(altitude > groundLevel) //If In Air
       STATE = "FLIGHT";
     else if((altitude >= groundLevel - levelError && altitude <= groundLevel + levelError) && itFlew) //On Ground, And Has Flown
-      STATE = "LANDED";
+      STATE = "LANDED";*/
   //Blink LED:
     if(millis() - msLastBlink >= msBlinkRate) {
       blinkLED();
