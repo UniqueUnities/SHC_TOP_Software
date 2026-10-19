@@ -1,20 +1,6 @@
 /*SHC - The One Plane: Full Software Code; Collective of All Software For The Aircraft
-  Created: 7 October 2026
-  Modified: 17 October 2026
-  By Arwyn & Seito
-
-  Uses Adafruit BMP3xx Library.
-    Sensor Uses I2C or SPI For Communication; 2/'4 Pins Required
-  Uses Adafruit Unified Sensor Library (Adafruit_Sensor) To Provide Common "Type" For Sensor Data
-    Need To Dowload Adafruit_Sensor Library To Run Code
-    Assigned Unique ID (12345) To Sensor For Identification In DataLogs
-  Queeries U-Blox Module For Lat & Long & Altitude Over SPI; Also Turns Off NMEA Output On SPI Port TO Decrease SPI Traffic
-    Note: To Convert Lat/Long To Coordinates, Divide Numbers By 10,000,000
-    DSEL/SPI Jumper Closed On U-Blox Board Must Be Soldered For SPI Communication
-  SD Card Logger Logs Data From Sensors
-    Analog Sensors On Analog ins 0, 1, & 2
-    SD Card Attached to SPI Bus: MISO - Pin4 | MOSI - Pin7 | CS - Pin5 | SCK - Pin6
-  Notation Source: https://docs.arduino.cc/built-in-examples/digital/toneMelody/*/
+  Created: 7 October 2026 | Modified: 18 October 2026 | By Arwyn & Seito
+  Buzzer Notation Source: https://docs.arduino.cc/built-in-examples/digital/toneMelody/*/
 
 //Libraries:
   #include <Wire.h> //Core I2C Communication
@@ -27,23 +13,20 @@
   #include <SD.h> //Data Logging For SD Card
 
 //Pins & Sensor Set-Up (REVIEW: Review Commented Pins | Implement Details Of Each Pin):
-  #define SDA 4 //I2C manual configuration
-  #define SCL 5 //I2C manual configuration
+  //#define SDA 4 //I2C manual configuration
+  //#define SCL 5 //I2C manual configuration
   #define txPin 0 //HC12 Radio
   #define rxPin 1 //HC12 Radio
   #define HC12 Serial1  //HC12 Radio
-  //#define SD_SO 16  //SD Card
-  //#define DOOR 17 //This Will Detect A Signal And Send A Signal To Buzzer; Please Test, Please Test; Testing Is Good And Makes Me Happy :3
-  //#define SD_CLK 18 //SD Card
-  //#define SD_SI 19  //SD Card
-  #define chipSelect 20 //SD Card
-  #define BUZZER_PIN 21 //Connect Buzzer
+  //#define DOOR 17 //This Will Detect A Signal And Send A Signal To Buzzer
+  //#define chipSelect 20 //Only Neccessary Pin For SD Card | Other Pins: SD_SO 16 SD_CLK 18 SD_SI 19
+  //#define BUZZER_PIN 21 //Connect Buzzer
   #define LED_WHITE 22  //Connect Blinking LED
-  SFE_UBLOX_GNSS myGNSS;
-  Adafruit_BMP3XX bmp;
-  Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28, &Wire); //Check I2C Device Address
+  //SFE_UBLOX_GNSS myGNSS;
+  //Adafruit_BMP3XX bmp;
+  //Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28, &Wire); //Check I2C Device Address
 
-//NoteVoltage.h (Voltage -> Notes):
+/*NoteVoltage.h (Voltage -> Notes):
   #define REST     0
   #define NOTE_C3  130.813
   #define NOTE_CS3 138.591
@@ -80,65 +63,64 @@
   #define NOTE_GS5 830.609
   #define NOTE_A5  880.000
   #define NOTE_AS5 932.328
-  #define NOTE_B5  987.767
+  #define NOTE_B5  987.767*/
   
 //Aircraft States:
-  enum piracyStates {
+  /*enum piracyStates {
     PIRATE = 0;
     STANDBY;
     LAUNCH;
     FLIGHT;
     LANDED;
-    CAPTAIN;
-  }
+  }*/
 
 //Global Variables:
-  enum piracyStates State = PIRATE;
+  //enum piracyStates State = PIRATE;
   //bool state = false; //uart
   int stateLED = LOW; //LED Starts As LOW (Off)
-  const int levelError = 5; //Feet Off The Ground While Still Classified As Ground Level
-  bool itFlew = false;  //Aircraft Flew
-  bool musicTime = false; //Sand Deployment Doors Opened
+  //const int levelError = 5; //Feet Off The Ground While Still Classified As Ground Level
+  //bool itFlew = false;  //Aircraft Flew
+  //bool musicTime = false; //Sand Deployment Doors Opened
   //Sensor Data:
     //const float SEALEVELPRESSURE_HPA 1013.25 //never used
-    double = storeTime = -9999999;
-    double groundLevel = -9999999;
-    double temperature = -9999999;
-    double pressure = -9999999;
-    double altitude = -9999999;
-    double deciLat = -9999999;
-    double deciLong = -9999999;
-    double roll = -9999999;
-    double pitch = -9999999;
-    double yaw = -9999999;
-    double accelX = -9999999;
-    double accelY = -9999999;
-    double accelZ = -9999999;
-    double speed = -9999999;
+    double = storeTime = -1;
+    double groundLevel = -1;
+    double temperature = -1;
+    double pressure = -1;
+    double altitude = -1;
+    double decimalLat = -1;
+    double decimalLong = -1;
+    double roll = -1;
+    double pitch = -1;
+    double yaw = -1;
+    double accelX = -1;
+    double accelY = -1;
+    double accelZ = -1;
+    double speed = -1;
     String dataString = "";
   //Conditional Cycles:
-    const int msBMPPullRate = 100; //Time Between BMP388 Data Pulls
+    /*const int msBMPPullRate = 100; //Time Between BMP388 Data Pulls
     int msLastBMPPull = 0;
     const int msBNOPullRate = 100; //Time Between BNO055 Data Pulls
     int msLastBNOPull = 0;
     const int msGNSSPullRate = 1000;  //Higher Rate Between GNSS Data Pulls To Limit SPI Traffic
     int msLastGNSSPull = 0;
     const int msWriteRate = 100;  //SD Card Write Rate
-    int msLastWrite = 0;
+    int msLastWrite = 0;*/
     const int msRadioRate = 100;  //HC12 Radio Transmission Rate
     int msLastRadio = 0;
     const int msBlinkRate = 500;  //LED Blinking Rate
     int msLastBlink = 0;
-    float noteDuration = 0; //Length Of Note Playing
-    int msLastNote = 0; //Time Since Last Note Played
-    int noteSeq = 0;  //Current Note In Sequence; Returns To 0 For Repeats
+    //float noteDuration = 0; //Length Of Note Playing
+    //int msLastNote = 0; //Time Since Last Note Played
+    //int noteSeq = 0;  //Current Note In Sequence; Returns To 0 For Repeats
   //Music - //Mr. Sandman:
-    bool mrSandman = true;
-    const int mrBPM = 142;  //Mr. Sandman BPM
-    const float mrNotesArr[] {
+    //bool mrSandman = true;
+    //const int mrBPM = 142;  //Mr. Sandman BPM
+    /*const float mrNotesArr[] {
       NOTE_C4, NOTE_E4, NOTE_G4, NOTE_B4, NOTE_A4, NOTE_G4, NOTE_E4, NOTE_C4, NOTE_D4, NOTE_F4, NOTE_A4, NOTE_C5, NOTE_B4, NOTE_C4, NOTE_E4, NOTE_G4,NOTE_B4, NOTE_A4, NOTE_G4, NOTE_E4, NOTE_C4, NOTE_D4, NOTE_F4, NOTE_A4, NOTE_C5, NOTE_B4, NOTE_G3, NOTE_A3, NOTE_B3, NOTE_A3, REST, REST, NOTE_B3, NOTE_B3, NOTE_A3, NOTE_B3, REST, NOTE_C4, NOTE_C4, NOTE_B3, NOTE_C4, NOTE_C4, REST, NOTE_B3, NOTE_F3, NOTE_F3, NOTE_E3, NOTE_F3, REST, REST, REST, NOTE_B3, NOTE_B3, NOTE_A3, NOTE_B3, REST, NOTE_A3, NOTE_E3, NOTE_E3, NOTE_D3, NOTE_E3, NOTE_G3, REST, NOTE_D4, NOTE_D4, NOTE_C4, NOTE_D4, NOTE_C4, NOTE_D4, NOTE_C4, NOTE_DS4, NOTE_DS4, NOTE_E4, NOTE_D4, REST, NOTE_B3, NOTE_A3, REST, REST, NOTE_B3, NOTE_B3, NOTE_A3, NOTE_B3, REST, REST, REST, NOTE_C4, NOTE_C4, NOTE_B3, NOTE_C4, NOTE_C4, REST, NOTE_B3, NOTE_F3, NOTE_F3, NOTE_E3, NOTE_F3, REST, REST, NOTE_D3, NOTE_F3, NOTE_A3, NOTE_C4, NOTE_C4, NOTE_C4, NOTE_D4, REST, NOTE_C4, NOTE_D4, NOTE_E4, NOTE_E4, NOTE_E4, NOTE_C4, NOTE_E4, NOTE_C4, NOTE_E4, NOTE_G4, NOTE_B4, NOTE_A4, NOTE_G4, NOTE_E4, NOTE_C4, NOTE_D4, NOTE_F4, NOTE_A4, NOTE_C5, NOTE_B4, NOTE_C4, NOTE_E4, NOTE_G4, NOTE_B4, NOTE_A4, NOTE_G4, NOTE_E4, NOTE_C4, NOTE_D4, NOTE_F4, NOTE_A4, NOTE_C5, NOTE_B4, NOTE_C5, NOTE_C5, REST
     };
-    const float mrDurations[] {
+    /*const float mrDurations[] {
       8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 2, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 8, 8, 4, 8, 2, 8, 8, 8, 4, 2, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 4, 8, 8, 8, 8, 4, 8, 8, 8, 8, 8, 4, 4, 4, 8, 8, 8, 8, 8, 8, 8, 4, 4, 8, 4, 8, 8, 4, 8, 2, 8, 8, 8, 4, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 4, 4, 8, 4, 8, 8, 8, 2, 4, 8, 8, 4, 4, 8, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 2, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 2, 1, 8, 0.25
     };
     const int mrSize = sizeof(mrNotesArr) / sizeof(int);
@@ -150,7 +132,7 @@
     const float etrDurations[] {
       4, 8, 8, 4, 8, 8, 8, 8, 8, 8, 4, 4, 4, 8, 8, 4, 8, 8, 8, 2, 0.25
     }
-    const int etrSize = sizeof(etrNotesArr) / sizeof(int);
+    const int etrSize = sizeof(etrNotesArr) / sizeof(int);*/
 
 void availSerial() //Wait For Serial Monitor Availability (REVIEW: Is This Needed?):
 {
@@ -165,19 +147,19 @@ void initPinModes() //Pins Set-Up
 {
   Serial.println(F("{DEBUG - SETUP TEST: Initializing Pin Modes...}"));
   Serial.begin(115200); //REVIEW: Why 115200?
-  pinMode(BUZZER_PIN, OUTPUT);
+  //pinMode(BUZZER_PIN, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT); //Turn-on All Non-White LEDs
   pinMode(rxPin, INPUT);
   pinMode(txPin, OUTPUT);
-  Wire.begin();
+  //Wire.begin();
   //Set-Up SDA & SCL Wires (REVIEW: Is This Needed?):
-  Serial.println("{DEBUG - TEST: Initializing SDA & SCL Wires...}");
-  Wire.setSDA(SDA);
-  Wire.setSCL(SCL);
-  Serial.println("{DEBUG - SUCCESS: Set-Up SDA & SCL Wires! :>}");
+  //Serial.println("{DEBUG - TEST: Initializing SDA & SCL Wires...}");
+  //Wire.setSDA(SDA);
+  //Wire.setSCL(SCL);
+  //Serial.println("{DEBUG - SUCCESS: Set-Up SDA & SCL Wires! :>}");
   Serial.println(F("{DEBUG - SETUP SUCCESS: Pin Modes Initialized! :>}"));
 }
-void initBMP() //BMP388 Initialization & Error-Checking
+/*void initBMP() //BMP388 Initialization & Error-Checking
 { 
   Serial.println(F("{DEBUG - SETUP TEST: Initializing BMP388 Sensor...}"));
   if (!bmp.begin_I2C()) { //Testing Hardware I2C Mode
@@ -206,43 +188,26 @@ void initGNSS() //GNSS Initialization & Error-Checking
   }
   myGNSS.setI2COutput(COM_TYPE_UBX); //Set I2C Port To Output UBX Protocol Data Only
   Serial.println(F("{DEBUG - SETUP SUCCESS: GNSS Successfully Initialized! :>}"));
-}
-void initSD() //Initialize SD Card
+}*/
+/*void initSD() //Initialize SD Card
 {
   Serial.println(F("{DEBUG - SETUP TEST: Initalizing SD Card...}"));
-  /*SD Card Initalization (REVIEW: Should This Be Commented?):
-    bool sdInitialized = false;
-    if(RP_CLK_GPIO >= 0) { //No Special Requirements On Pin Locations; PIO Programmed
-      sdInitialized = SD.begin(RP_CLK_GPIO, RP_CMD_GPIO, RP_DAT0_GPIO);
-    }
-    else { //Ensure SPI Pinout SD Card Connected To Is Configured Properly & Select Correct SPI From _MISO Pin For RP2040
-      if(_MISO == 0 || _MISO == 4 || _MISO == 16) {
-        SPI.setRX(_MISO);
-        SPI.setTX(_MOSI);
-        SPI.setSCK(_SCK);
-        sdInitialized = SD.begin(_CS);
-      }
-      else if (_MISO == 8 || _MISO == 12) {
-        SPI1.setRX(_MISO);
-        SPI1.setTX(_MOSI);
-        SPI1.setSCK(_SCK);
-        sdInitialized = SD.begin(_CS, SPI1);
-      }
-      else {
-        Serial.println(F("ERROR: Unknown SPI Configuration"));
-        return;
-      }*/
-
-    if(!SD.begin(chipSelect)) {
-      Serial.println(F("{DEBUG - SETUP ERROR: SD Card Initalization Failed. :<}"));
-    }
-    /*Determine If Card Present (REVIEW: Should This Be Commented?):
-      if (!sdInitialized) {
-        Serial.println("{DEBUG - SETUP ERROR: Card Failed Or Not Present. :<}");
-        return; //End Set-Up; Nothing Can Be Stored | REVIEW: Should We Implement A Loop To Ensure Proper Set-Up?
-      }*/
-    Serial.println(F("{DEBUG - SETUP SUCCESS: SD Card Initialization Successful! :>}"));  
-}
+  if(!SD.begin(chipSelect)) {
+    Serial.println(F("{DEBUG - SETUP ERROR: SD Card Initalization Failed. :<}"));
+  }
+  Serial.println(F("{DEBUG - SETUP SUCCESS: SD Card Initialization Successful! :>}")); 
+  File dataFile = SD.open("datalog.csv", FILE_WRITE); //Open File (Only One File Can Open At A Time)
+  dataString="Time,Longitude,Latitude,Altitude,Pressure,Temperature,Roll,Pitch,Yaw,Ax,Ay,Az,Speed";
+  if(dataFile) { //If File Is Available, Write To It
+    dataFile.println(dataString);
+    dataFile.close();
+    Serial.println(dataString); //Print To Serial Port
+    Serial.println("{DEBUG - Headers Successfully Written! :>}");
+  }
+  else { //If File Is Not Open, Show Error
+    Serial.println("{DEBUG - LOOP ERROR: Error Opening datalog.csv. :<}");
+  }
+}*/
 void initHC12()
 {
   Serial.println(F("{DEBUG - SETUP TEST: Initializing HC12 Serial Link...}"));
@@ -255,7 +220,7 @@ void initHC12()
   }*/
   Serial.println(F("{DEBUG - SETUP SUCCESS: HC12 Serial Link Initialized! :>}"));
 }
-void blinkLED() //Blink The LED; Does Not Perform Time-Related Functions
+/*void blinkLED() //Blink The LED; Does Not Perform Time-Related Functions
 {
   if(stateLED = LOW) {
     stateLED = HIGH;
@@ -267,7 +232,24 @@ void blinkLED() //Blink The LED; Does Not Perform Time-Related Functions
   }
   digitalWrite(LED_WHITE, stateLED)
 }
-bool readBMP355()
+
+void playNote() { //Play Current Note, And Prepare For The Next
+  if(noteSeq == size) {
+    noteSeq = 0;
+    mrSandman = !mrSandman;
+  }
+  noTone(BUZZER_PIN); //Stop Playing On The Buzzer
+  if(mrSandman) {
+    noteDuration = 60 / mrBPM / (mrDurations[mrNoteSeq]/4); //Duration(sec) Of Given Note
+    tone(BUZZER_PIN, notesArr[mrNoteSeq], noteDuration);
+  }
+  else {
+    noteDuration = 60 / etrBPM / (etrDurations[etrNoteSeq]/4); //Duration(sec) Of Given Note
+    tone(BUZZER_PIN, notesArr[etrNoteSeq], noteDuration);
+  }
+  noteSeq++;
+}*/
+/*bool readBMP355()
 {
   if(!bmp.performReading()) {
       Serial.println(F("{DEBUG - LOOP ERROR: BMP388 Failed To Perform Reading. :<}"));
@@ -325,37 +307,37 @@ bool readBNO055()
       Serial.println("Gyro = " + String(gyro));
       Serial.println("Accel = " + String(accel));
       Serial.println("Mag = " + String(mag));*/
-    return true;
-}
-bool readGNSS()
+    //return true;
+//}
+/*bool readGNSS()
 {
-  if(myGNSS.getPVT() == true) {
-    if(myGNSS.getGnssFixOk() == true) {
-      //REVIEW: Implement System To Check For Reading Errors
-      long rawLat = myGNSS.getLatitude();
-      long rawLong = myGNSS.getLongitude();
-      decimalLat = rawLat / 10000000.0;
-      decimalLong = rawLong / 10000000.0;
-      alt = myGNSS.getAltitudeMSL() / 1000.0; // Converts mm to Meters
-      speed = (myGNSS.getGroundSpeed() / 1000.0) * 3.6; // Converts mm/s to km/h
-      //byte SIV = myGNSS.getSIV();
-      Serial.println("Lat: " + String(decimalLat,7));
-      Serial.println("Long: " + String(decimalLong,7));
-      Serial.println("Alt (MSL): " + String(alt) + "m");
-      Serial.println("Speed: " + String(speed) + "(km/h)");
-      return true;
+  if(myGNSS.getPVT() && myGNSS.getGnssFixOk()) {
+    long rawLat = myGNSS.getLatitude();
+    long rawLong = myGNSS.getLongitude();
+    decimalLat = rawLat / 10000000.0;
+    decimalLong = rawLong / 10000000.0;
+    altitude = myGNSS.getAltitudeMSL() / 1000.0; // Converts mm to Meters
+    speed = (myGNSS.getGroundSpeed() / 1000.0) * 3.6; // Converts mm/s to km/h
+    if(groundLevel < 0) {
+      groundLevel = myGNSS.getAltitudeMSL() / 1000.0;
     }
+    //byte SIV = myGNSS.getSIV();
+    Serial.println("Lat: " + String(decimalLat,7));
+    Serial.println("Long: " + String(decimalLong,7));
+    Serial.println("Alt (MSL): " + String(altitude) + "m");
+    Serial.println("Speed: " + String(speed) + "(km/h)");
+    return true;
   }
   return false;
-}
+}*/
 void dataCompile()
 {
   dataString = String(storeTime) + ",";
   dataString += String(decimalLong,6) + ",";
   dataString += String(decimalLat,6) + ",";
-  dataString += String(alt,2) + ",";
+  dataString += String(altitude,2) + ",";
   dataString += String(pressure,2) + ",";
-  dataString += String(temp,2) + ",";
+  dataString += String(temperature,2) + ",";
   dataString += String(roll,2) + ",";
   dataString += String(pitch,2) + ",";
   dataString += String(yaw,2) + ",";
@@ -364,9 +346,10 @@ void dataCompile()
   dataString += String(accelZ,2) + ",";
   dataString += String(speed,2);
 }
-bool writeToSD()
+/*bool writeToSD()
 {
   Serial.println("{DEBUG - LOOP CHANGE: Data Compiled; Now Writing In SD Card...}");
+  dataCompile();
   File dataFile = SD.open("datalog.csv", FILE_WRITE); //Open File (Only One File Can Open At A Time)
   if(dataFile) { //If File Is Available, Write To It
     msLastWrite = millis();
@@ -380,11 +363,11 @@ bool writeToSD()
     Serial.println("{DEBUG - LOOP ERROR: Error Opening datalog.csv. :<}");
   }
   return false;
-}
+}*/
 bool writeToHC12()
 {
     //digitalWrite(LED_BUILTIN, state); //visual indicator
-    String dataString = dataCompile();
+    dataCompile();
     HC12.println(dataString);
     msLastRadio = millis();
     Serial.println("{DEBUG - LOOP SUCCESS: Data Successfully Transmitted To HC12 Radio! :>}");
@@ -401,19 +384,26 @@ bool writeToHC12()
 }
 
 void setup() {
-  piracyStates STATE = STANDBY;
+  //piracyStates STATE = STANDBY;
   availSerial();
   initPinModes();
-  initBMP();
-  initBNO(); 
-  initGNSS();
-  initSD();
+  //initBMP();
+  //initBNO(); 
+  //initGNSS();
+  /*if(myGNSS.getPVT() && myGNSS.getGnssFixOk()) {
+    groundLevel = myGNSS.getAltitudeMSL() / 1000.0;
+    Serial.println(F("{DEBUG - SETUP SUCCESS: Ground Level Stored As" + String(groundLevel) + "! :>}"));
+  }
+  else {
+    Serial.println(F("{DEBUG - SETUP ERROR: Ground Level Error; Will Find When GNSS Read. :<}"));
+  }*/
+  //initSD();
   initHC12();
   Serial.println(F("{DEBUG - SETUP SUCCESS: All Tests Complete; Control Passed To System Loop!! :D}"));
 }
 
 void loop() {
-  //Blink LED:
+  /*Blink LED:
     if(millis() - msLastBlink >= msBlinkRate) {
       Serial.print("{DEBUG - LOOP CHANGE: " + String(millis() - msLastBlink) + "ms >= " + String(msBlinkRate) + "ms.; ");
       blinkLED();
@@ -421,71 +411,13 @@ void loop() {
     }
   //Buzzer Melody (REVIEW: If Signal Recieved From Pin):
       //Serial.println("{DEBUG - LOOP CALC: Buzzer Notes (" + String(millis() - msLastNote()) + "ms >= " + String(duration * 1.30) + "ms)}");
-      if((noteSeq < size) && (millis() - msLastNote >= noteDuration * 1.30)) {
-        if(noteSeq == size) {
-          noteSeq = 0;
-          mrSandman = !mrSandman;
-        }
-        noTone(BUZZER_PIN); //Stop Playing On The Buzzer
-        if(mrSandman) {
-          noteDuration = 60 / mrBPM / (mrDurations[mrNoteSeq]/4); //Duration(sec) Of Given Note
-          tone(BUZZER_PIN, notesArr[mrNoteSeq], noteDuration);
-        }
-        else {
-          noteDuration = 60 / etrBPM / (etrDurations[etrNoteSeq]/4); //Duration(sec) Of Given Note
-          tone(BUZZER_PIN, notesArr[etrNoteSeq], noteDuration);
-        }
-        noteSeq++;
+      if(digitalRead(DOOR_PIN))
+        songTime = true;
+      if((songTime) && (millis() - msLastNote >= noteDuration * 1.30)) {
+        playNote();
         msLastNote = millis();
-      }
-  /*CAP: Below Ground Level, Above 300ft
-  //CAP: Negative Time
-  switch(STATE) { //State Machine
-    case 0: //PIRATE
-      if((altitude >= groundLevel - levelError && altitude <= groundLevel + levelError) && !itFlew)
-        STATE = LAUNCH;
-      else if(altitude > groundLevel)
-        STATE = FLIGHT;
-      else if((altitude >= groundLevel - levelError && altitude <= groundLevel + levelError) && itFlew)
-        STATE = LANDED;
-      break;
-    case 1: //STANDBY
-      if() { //REVIEW: Signal To Move
-        STATE = LAUNCH;
-      }
-      break;
-    case 2: //LAUNCH
-      //REVIEW: Sensor Data
-      if(altitude > groundLevel) //REVIEW: In Flight; Altitude > Ground Level
-        STATE = FLIGHT;
-        itFlew = true;
-      }
-      break;
-    case 3: //FLIGHT
-      //REVIEW: Sensor Data
-      //If Buzzer Has Not Played Freebird, Play It!
-      if((altitude >= groundLevel - levelError && altitude <= groundLevel + levelError) && itFlew) { //REVIEW: Finished Flight; Altitude == Ground Level
-        STATE = LANDED;
-      }
-      break;
-    case 4: //LANDED
-      //REVIEW: Sensor Data
-      if(false) { //REVIEW: Stopped Moving
-        STATE = CAPTAIN
-      }
-      break;
-    case 5: //CAPTAIN
-      //REVIEW: Stop Storing Sensor Data
-        //Prepare For Data Analysis:
-          //Parse All Data; Check If Realistic (Too Small/Large) and Unrealistic
-          //Update Min/Max Values & Create Summary
-          //Generate Data Plots As Function of Time
-      break;
-    default:
-      break;
-  }*/
-
-  //Output Sensor Data:
+      }*/
+  /*Output Sensor Data:
     storeTime = millis();
     Serial.println("Current Time: " + String(storeTime) + "ms");
     if(millis() - msLastBMPPull >= msBMPPullRate) {
@@ -503,18 +435,56 @@ void loop() {
       if(readGNSS());
         msLastGNSSPull = millis();
     }
-  Serial.println(F("{DEBUG - LOOP SUCCESS: All Sensor Data Successfully Read! :>}"));
+  Serial.println(F("{DEBUG - LOOP SUCCESS: All Sensor Data Successfully Read! :>}"));*/
 
-  //SD Card Storage (REVIEW: Implement Beyond Tests):
+  /*SD Card Storage (REVIEW: Implement Beyond Tests):
     if(millis() - msLastWrite >= msWriteRate) { //Review: Can We Open The File Before Compiling Data To Send; It Would Be Optimal?
       Serial.println("{DEBUG - LOOP CHANGE: Preparing Data Transfer To SD Card...}");
       if(writeToSD())
         msLastWrite = millis();
-  }
+  }*/
   //HC12 Radio Transmission (REVIEW: Implement Past Test):
     if(millis() - msLastRadio >= msRadioRate) {
       Serial.println("{DEBUG - LOOP CHANGE: Preparing Data Transfer To HC12 Radio...}");
       if(writeToHC12())
         msLastRadio = millis();
     }
+  /*CAP: Below Ground Level, Above 300ft
+  //CAP: Negative Time
+  switch(STATE) { //State Machine
+    case 0: //PIRATE
+      if((altitude >= groundLevel - levelError && altitude <= groundLevel + levelError) && !itFlew)
+        STATE = LAUNCH;
+      else if(altitude > groundLevel)
+        STATE = FLIGHT;
+      else if((altitude >= groundLevel - levelError && altitude <= groundLevel + levelError) && itFlew)
+        STATE = LANDED;
+      break;
+    case 1: //STANDBY
+      if() {  //REVIEW: Signal To Move
+        STATE = LAUNCH;
+      }
+      break;
+    case 2: //LAUNCH
+      if(altitude > groundLevel + levelError)
+        STATE = FLIGHT;
+        itFlew = true;
+      }
+      break;
+    case 3: //FLIGHT
+      if((altitude >= groundLevel - levelError && altitude <= groundLevel + levelError) && itFlew) { //REVIEW: Finished Flight; Altitude == Ground Level
+        STATE = LANDED;
+      }
+      break;
+    case 4: //LANDED
+      break;
+    default:
+      if((altitude >= groundLevel - levelError && altitude <= groundLevel + levelError) && !itFlew)
+        STATE = LAUNCH;
+      else if(altitude > groundLevel)
+        STATE = FLIGHT;
+      else if((altitude >= groundLevel - levelError && altitude <= groundLevel + levelError) && itFlew)
+        STATE = LANDED;
+      break;
+  }*/
 }
