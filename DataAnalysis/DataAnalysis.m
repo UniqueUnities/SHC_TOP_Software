@@ -22,11 +22,6 @@ if ~any(isfinite(T.Time))
     error('Time column has no valid values.');
 end
 
-% checks to see if time goes backwards or not
-if any(diff(T.Time(isfinite(T.Time))) <= 0)
-    warning('Timestamps repeat or go backwards.');
-end
-
 % {column name in CSV, display label, unit, min/max}
 signals = {
     'Longitude','Longitude','deg', [-87, -86];
@@ -44,13 +39,36 @@ signals = {
 };
 
 t_ms = T.Time; % retrieves data regarding time in milliseconds
-tvalid = t_ms(isfinite(t_ms)); %retrieves valid data regarding time
-t_s = (t_ms - min(tvalid)) / 1000; %converts to seconds
+
+% flight detection: time going backward means the Pico rebooted
+idx = find(isfinite(t_ms)); % rows with a real timestamp
+dt = diff(t_ms(idx)); % change between consecutive valid rows
+resetAt = idx(find(dt < 0) + 1); % first row of each new flight
+
+flightID = ones(height(T), 1); % tag every row with a flight number
+for k = 1:numel(resetAt)
+    flightID(resetAt(k):end) = flightID(resetAt(k):end) + 1;
+end
+nFlights = max(flightID);
+
+% per-flight time axis in seconds, each flight starting at 0
+t_s = nan(height(T), 1);
+for f = 1:nFlights
+    m = (flightID == f) & isfinite(t_ms);
+    if any(m)
+        t_s(m) = (t_ms(m) - min(t_ms(m))) / 1000;
+    end
+end
 
 % flight summary
 fprintf('Flight Summary\n');
-% print flight time
-fprintf('Flight time: %.2f s\n', (max(tvalid) - min(tvalid)) / 1000);
+fprintf('Flights detected: %d\n', nFlights);
+for f = 1:nFlights
+    m = (flightID == f) & isfinite(t_ms);
+    fprintf('Flight %d time: %.2f s\n', f, (max(t_ms(m)) - min(t_ms(m))) / 1000);
+end
+
+colors = lines(nFlights);                % one color per flight
 
 n = size(signals, 1);
 % loops through each row in the array
@@ -97,11 +115,23 @@ for i = 1:n
     yplot = y;
     yplot(~keep) = NaN;
 
-    % plotting the graph for current column
-    figure;
-    plot(t_s, yplot, 'b.-', 'LineWidth', 2);
+    % plotting: one figure per signal, one colored line per flight
+    figure; hold on;
+    for f = 1:nFlights
+        inF = (flightID == f);
+        yi_f = y(keep & inF);
+        if isempty(yi_f)
+            continue;
+        end
+        fprintf('  Flight %d  Max: %f  Min: %f\n', f, max(yi_f), min(yi_f));
+
+        yp = yplot;
+        yp(~inF) = NaN; % hide the other flight's points
+        plot(t_s, yp, '.-', 'Color', colors(f,:), 'LineWidth', 2, ...
+             'DisplayName', sprintf('Flight %d', f));
+    end
     xlabel('Time (s)');
     ylabel(sprintf('%s (%s)', label, unit));
     title(sprintf('%s as a Function of Time', label));
-    grid on;
+    legend('show'); grid on;
 end
