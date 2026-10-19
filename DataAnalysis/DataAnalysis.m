@@ -27,23 +27,20 @@ if any(diff(T.Time(isfinite(T.Time))) <= 0)
     warning('Timestamps repeat or go backwards.');
 end
 
-% possible error values from sensors
-sentinels = [-999, -9999, 65535];
-
 % {column name in CSV, display label, unit, min/max}
 signals = {
-    'Longitude','Longitude','deg', [-180, 180];
-    'Latitude','Latitude','deg', [-90, 90];
-    'Altitude','Altitude','m', [-Inf, Inf];
-    'Pressure','Pressure','hPa', [-Inf, Inf];
-    'Temperature','Temperature','°C', [-Inf, Inf];
-    'Roll','Roll','deg', [-Inf, Inf];
-    'Pitch','Pitch','deg', [-Inf, Inf];
-    'Yaw','Yaw','deg', [-Inf Inf];
-    'Ax','Acceleration (x)','m/s^2', [-Inf, Inf];
-    'Ay','Acceleration (y)','m/s^2', [-Inf, Inf];
-    'Az','Acceleration (z)','m/s^2', [-Inf, Inf];
-    'Speed','Speed','km/h', [-Inf, Inf]
+    'Longitude','Longitude','deg', [-87, -86];
+    'Latitude','Latitude','deg', [34, 35];
+    'Altitude','Altitude','m', [100, 3000];
+    'Pressure','Pressure','hPa', [700, 1100];
+    'Temperature','Temperature','°C', [-10, 40];
+    'Roll','Roll','deg', [-30, 30];
+    'Pitch','Pitch','deg', [-10, 15];
+    'Yaw','Yaw','deg', [0, 360];
+    'Ax','Acceleration (x)','m/s^2', [-20, 20];
+    'Ay','Acceleration (y)','m/s^2', [-20, 20];
+    'Az','Acceleration (z)','m/s^2', [-20, 20];
+    'Speed','Speed','km/h', [0, Inf]
 };
 
 t_ms = T.Time; % retrieves data regarding time in milliseconds
@@ -75,15 +72,12 @@ for i = 1:n
 
     % checks that the data exists and is not physically impossible
     present = isfinite(t_ms) & isfinite(y); % not missing and not infinite
-    corrupt = present & (y < limits(1) | y > limits(2) | ismember(y, sentinels));
-    if any(strcmp(col, {'Latitude', 'Longitude'}))
-        corrupt = corrupt | (present & y == 0);
-    end
+    corrupt = present & (y < limits(1) | y > limits(2));
     keep  = present & ~corrupt; % passed both checks
 
     % counts the total number of missing and corrupt
-    nMissing = sum(~present);
-    nCorrupt = sum(corrupt);
+    missingSum = sum(~present);
+    corruptSum = sum(corrupt);
 
     % stores cleaned samples for summary statistics and plotting
     yi = y(keep);
@@ -96,7 +90,7 @@ for i = 1:n
 
     % prints the summary for the current column
     fprintf('%s Max: %f  Min: %f  (missing %d, corrupt %d)\n', ...
-            label, max(yi), min(yi), nMissing, nCorrupt);
+            label, max(yi), min(yi), missingSum, corruptSum);
 
     % blank bad samples with NaN instead of deleting them,
     % so dropouts show as gaps instead of straight lines across them
