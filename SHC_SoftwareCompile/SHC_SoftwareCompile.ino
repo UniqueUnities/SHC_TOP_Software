@@ -29,6 +29,7 @@
   const int levelError = 5; //Meters Off The Ground While Still Classified As Ground Level
   bool itFlew = false;  //Did The Aircraft Fly? (Did It Ever Enter FLIGHT?)
   bool songTime = false; //Did The Sand Deployment Doors Open? (Did The PICO Recieve Signal From Door Pin?)
+  char fileName[20];
   //Sensor Data (-999999 As Error-Handling Value):
     double storeTime = -999999;
     double groundLevel = -999999;
@@ -340,7 +341,18 @@ void dataCompile()  //Compile All Sensor Data Into A String
 bool writeToSD()  //Send Data To SD Card
 {
   debugView("writeToSD");
-  File dataFile = SD.open("datalog.csv", FILE_WRITE); //Open File (Only One File Can Open At A Time)
+  int fileNum = 0;
+  while (true) {
+    // Dynamically create a name like "flight_0.csv", "flight_1.csv", etc.
+    sprintf(fileName, "datalog_%d.csv", fileNum);
+    
+    // If this file number doesn't exist yet, we break out and use it!
+    if (!SD.exists(fileName)) {
+      break; 
+    }
+    fileNum++; // If it does exist, check the next number
+  }
+  File dataFile = SD.open(fileName, FILE_WRITE); //Open File (Only One File Can Open At A Time)
   if(dataFile) { //If File Is Available, Write To It
     dataFile.println(dataString_SD);
     dataFile.close();
