@@ -100,10 +100,10 @@ for i = 1:n
 
     % plotting the graph for current column
     figure;
-    plot(t_s, yplot, 'b.-', 'LineWidth', 2);
+    plot(t_s, yplot, 'r.-', 'LineWidth', 2);
     xlabel('Time (s)');
     ylabel(sprintf('%s (%s)', label, unit));
-    title(sprintf('%s as a Function of Time', label));
+    title(sprintf('Flight 1: %s as a Function of Time', label));
     grid on;
 end
 %----------------------------
@@ -210,7 +210,7 @@ for i = 1:n
     plot(t_s, yplot, 'b.-', 'LineWidth', 2);
     xlabel('Time (s)');
     ylabel(sprintf('%s (%s)', label, unit));
-    title(sprintf('%s as a Function of Time', label));
+    title(sprintf('Flight 2: %s as a Function of Time', label));
     grid on;
 end
 %----------------------------

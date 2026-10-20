@@ -46,7 +46,7 @@
     double speed = -999999;
     String dataString = ""; //String Used For Data Storage
     String dataString_SD = ""; //String Used For SD Card Data Transmission
-    char fileName[20];
+    String fileName;
   //Conditional Cycles (Rather Than Delays, The Miliseconds Run Between Each Process Type):
     const int msBMPPullRate = 200;
     int msLastBMPPull = 0;
@@ -161,7 +161,7 @@ void initPinModes() //Set-Up: Pins
 {
   debugView("initPins");
   Serial.begin(9600); //Sets SD Card
-  Serial1.begin(9600);  //Sets HC12 Radio; Other Pins: pinMode(rxPin, INPUT); pinMode(txPin, OUTPUT);
+  Serial1.begin(9600);  //Sets HC12 Radio; Other Pins: pinMode(rxPin, INPUT); pinMode(txPin, OUTPUT);*/
   pinMode(BUZZER_PIN, OUTPUT);  //Determine Pin Type For Buzzer (OUTPUT - Higher Voltage)
   pinMode(LED_WHITE, OUTPUT); //Determine Pin Type For Blinking LED (OUTPUT - Higher Voltage)
   Wire.begin();
@@ -211,14 +211,13 @@ void headerSD() //Write SD Card File Headers; Organize Data
   debugView("headerSD");
   int fileNum = 1;
   while (true) {
-    // Dynamically create a name like "flight_0.csv", "flight_1.csv", etc.
-    sprintf(fileName, "datalog%d.csv", fileNum);
-    
-    // If this file number doesn't exist yet, we break out and use it!
+    //dynamically create a name for csv file
+    fileName = "datalog"+String(fileNum)+".csv";    
+    //if this file number doesn't exist yet, break
     if (!SD.exists(fileName)) {
       break; 
     }
-    fileNum++; // If it does exist, check the next number
+    fileNum++; //if it does exist, check the next number
   }
   File dataFile = SD.open(fileName, FILE_WRITE); //Open File (Only One File Can Open At A Time)
   if(dataFile) { //If File Is Available, Write To It
@@ -392,7 +391,7 @@ void setup() {
 void loop() {
   
   //Aircraft States: //CAP: Below Ground Level, Above 300ft | Negative Time
-    /*(if((altitude >= groundLevel - levelError && altitude <= groundLevel + levelError) && !itFlew) //On Ground, But Has Not Yet Flown
+    /*if((altitude >= groundLevel - levelError && altitude <= groundLevel + levelError) && !itFlew) //On Ground, But Has Not Yet Flown
       STATE = "LAUNCH";
     else if(altitude > groundLevel) //If In Air
       STATE = "FLIGHT";
@@ -404,14 +403,14 @@ void loop() {
       msLastBlink = millis();
     }
   //Buzzer Melody:
-    /*if(!songTime && digitalRead(DOOR_PIN)) {
+    if(!songTime && digitalRead(DOOR_PIN)) {  //"digitalRead(DOOR_PIN)" Is An Attempt To Read From A PWM Signal From The Controller; Find Some Way To Read From The PWM, And Use That Instead. The Buzzer Code Works, And Should Start Playing Once Signal Is Recieved
       songTime = true;
       debugView("beginBuzzer");
-    }*/
-    /*if((songTime) && (millis() - msLastNote >= noteDuration * 1.30)) {
+    }
+    if((songTime) && (millis() - msLastNote >= noteDuration * 1.30)) {
       playNote();
       msLastNote = millis();
-    }*/
+    }
   //Output Sensor Data:
     storeTime = millis();
     if(millis() - msLastBMPPull >= msBMPPullRate) {
