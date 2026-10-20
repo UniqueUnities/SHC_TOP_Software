@@ -158,7 +158,7 @@ void debugView(String debugType)  //Viewing Debug Messages
   else if(debugSD && debugType == "writeToSD_ERROR")        Serial.println(F("{DEBUG - LOOP ERROR: Error Opening datalog.csv. :<}"));
   else if(debugSD && debugType == "writeToSD_SUCCESS")      Serial.println(F("{DEBUG - LOOP SUCCESS: dataString Successfully Written To The SD Card! :>}"));
   else if(debugHC12 && debugType == "writeToHC12")          Serial.println(F("{DEBUG - LOOP TEST: Transmitting dataString To HC12 Radio...}"));
-  else if(debugDOOR && debugType == "doorCheck")            Serial.println("{DEBUG - LOOP DATA: pulseIn: " + pulseIn(DOOR_PIN, HIGH) < 1400) + "}");
+  else if(debugDOOR && debugType == "doorCheck")            Serial.println("{DEBUG - LOOP DATA: pulseIn: " + (pulseIn(DOOR_PIN, HIGH) < 1400) + "}");
   else if(debugDOOR && debugType == "beginBuzzer")          Serial.println(F("{DEBUG - LOOP CHANGE: Signal Recieved From Door Pin; Buzzer Begins To Play! :>}"));
   else if(debugBUZZ && debugType == "playNote_CYCLE")       Serial.println(F("{DEBUG - LOOP CHANGE: Transitioned To Next Song!}")); 
   else if(debugBUZZ && debugType == "playNote_MrSand")      Serial.println("{DEBUG - LOOP CHANGE: Played Mr. Sandman Note " + String(noteSeq) + "(" + String (mrNotesArr[noteSeq]) + ") For " + String(noteDuration) + "ms...");
