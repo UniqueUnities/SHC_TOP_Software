@@ -28,7 +28,7 @@
   bool onLED = false; //LED Starts As LOW (Off)
   //const int levelError = 5; //Meters Off The Ground While Still Classified As Ground Level
   //bool itFlew = false;  //Did The Aircraft Fly? (Did It Ever Enter FLIGHT?)
-  bool songTime = true; //Did The Sand Deployment Doors Open? (Did The PICO Recieve Signal From Door Pin?)
+  bool songTime = false; //Did The Sand Deployment Doors Open? (Did The PICO Recieve Signal From Door Pin?)
   //Sensor Data (-999999 As Error-Handling Value):
     double storeTime = -999999;
     double groundLevel = -999999;
@@ -61,6 +61,8 @@
     const int msBlinkRate = 500;  //Required To Be 500ms
     int msLastBlink = 0;
   //Music (Songs: Mr. Sandman & Enter Sandman):
+    //int lastVal = 0;
+    //bool isMoving = false;
     float noteDuration = 0; //Length Of Note Playing
     int msLastNote = 0; //Time Since Last Note Played
     int noteSeq = 0;  //Current Note In Sequence; Returns To 0 For Repeats
@@ -126,28 +128,28 @@ void debugView(String debugType)  //Viewing Debug Messages
   else if(debugType == "initHC12_ERROR")      Serial.println(F("{DEBUG - SETUP SUCCESS: HC12 Serial Link Initialized! :>}"));
   else if(debugType == "blinkLED_ON")         Serial.println(F("{DEBUG - LOOP CHANGE: Switching LED State (Off -> On)}"));
   else if(debugType == "blinkLED_OFF")        Serial.println(F("{DEBUG - LOOP CHANGE: Switching LED State (On -> Off)}"));
-  //else if(debugType == "playNote")            Serial.println(F("{DEBUG - LOOP CONDITION: Preparing To Play Current Buzzer Note...}"));
+  else if(debugType == "playNote")            Serial.println(F("{DEBUG - LOOP CONDITION: Preparing To Play Current Buzzer Note...}"));
   else if(debugType == "playNote_CYCLE")      Serial.println(F("{DEBUG - LOOP CHANGE: Transitioned To Next Song!}")); 
   else if(debugType == "playNote_MrSand")    Serial.println("{DEBUG - LOOP CHANGE: Played Mr. Sandman Note " + String(noteSeq) + "(" + String (mrNotesArr[noteSeq]) + ") For " + String(noteDuration) + "ms...");
   else if(debugType == "playNote_EnterSand")  Serial.println("{DEBUG - LOOP CHANGE: Played Enter Sandman Note " + String(noteSeq) + "(" + String (etrNotesArr[noteSeq]) + ") For " + String(noteDuration) + "ms...");
   else if(debugType == "readBMP")             Serial.println(F("{DEBUG - LOOP CHANGE: Now Reading From BMP388...}"));
   else if(debugType == "readBMP_ERROR")       Serial.println(F("{DEBUG - LOOP ERROR: BMP388 Failed To Perform Reading. :<}"));
   else if(debugType == "readBMP_SUCCESS")     Serial.println(F("{DEBUG - LOOP SUCCESS: BMP388 Successfully Read!}"));
-  //else if(debugType == "readBMP_DATA")        Serial.println("{DEBUG - LOOP DATA: BMP388 Data:\t|Temperature:" + String(temperature) + "*C|\t|Pressure:" + String(pressure) + "hPa|}");
+  else if(debugType == "readBMP_DATA")        Serial.println("{DEBUG - LOOP DATA: BMP388 Data:\t|Temperature:" + String(temperature) + "*C|\t|Pressure:" + String(pressure) + "hPa|}");
   else if(debugType == "readBNO")             Serial.println(F("{DEBUG - LOOP CHANGE: Now Reading From BNO055...}"));
   else if(debugType == "readBNO_ERROR")       Serial.println(F("{DEBUG - LOOP ERROR: BNO055 Failed To Perform Reading. :<}"));
   else if(debugType == "readBNO_SUCCESS")     Serial.println(F("{DEBUG - LOOP SUCCESS: BNO055 Successfully Read!}"));
-  //else if(debugType == "readBNO_orientDATA")  Serial.println("{DEBUG - LOOP DATA: BNO055 Orientation Data:\t|Yaw:" + String(yaw) + "|\t|Roll: " + String(roll) + "|\t|Pitch: " + String(pitch) +"|}");
-  //else if(debugType == "readBNO_accelDATA")   Serial.println("{DEBUG - LOOP DATA: BNO055 Acceleration Data:\t|accelX:" + String(accelX) + "|\t|accelY: " + String(accelY) + "|\t|accelZ: " + String(accelZ) +"|}");
+  else if(debugType == "readBNO_orientDATA")  Serial.println("{DEBUG - LOOP DATA: BNO055 Orientation Data:\t|Yaw:" + String(yaw) + "|\t|Roll: " + String(roll) + "|\t|Pitch: " + String(pitch) +"|}");
+  else if(debugType == "readBNO_accelDATA")   Serial.println("{DEBUG - LOOP DATA: BNO055 Acceleration Data:\t|accelX:" + String(accelX) + "|\t|accelY: " + String(accelY) + "|\t|accelZ: " + String(accelZ) +"|}");
   else if(debugType == "readGNSS")            Serial.println(F("{DEBUG - LOOP CHANGE: Now Reading From GNSS...}"));
   else if(debugType == "readGNSS_ERROR")      Serial.println(F("{DEBUG - LOOP ERROR: GNSS Failed To Perform Reading. :<}"));
   else if(debugType == "readGNSS_SUCCESS")    Serial.println(F("{DEBUG - LOOP SUCCESS: GNSS Successfully Read!}"));
-  //else if(debugType == "readGNSS_DATA")       Serial.println("{DEBUG - LOOP DATA: GNSS Data:\t|deciLat:" + String(decimalLat) + "|\t|deciLong:" + String(decimalLong) + "|\t|altitude:" + String(altitude) + "|\t|speed:" + String(speed) +"|}");
-  //else if(debugType == "set_groundLevel")     Serial.println("{DEBUG - LOOP DATA: Ground Level Stored As: " + String(groundLevel) + "}");
+  else if(debugType == "readGNSS_DATA")       Serial.println("{DEBUG - LOOP DATA: GNSS Data:\t|deciLat:" + String(decimalLat) + "|\t|deciLong:" + String(decimalLong) + "|\t|altitude:" + String(altitude) + "|\t|speed:" + String(speed) +"|}");
+  else if(debugType == "set_groundLevel")     Serial.println("{DEBUG - LOOP DATA: Ground Level Stored As: " + String(groundLevel) + "}");
   else if(debugType == "set_gL_ERROR")        Serial.println(F("{DEBUG - SETUP ERROR: Ground Level Error; Will Find When GNSS Read. :<}"));
   else if(debugType == "dataCompile")         Serial.println(F("{DEBUG - LOOP DATA: Compiling All Sensor Data...}"));
-  //else if(debugType == "dataCompile_SUCCESS") Serial.println("{DEBUG - LOOP SUCCESS: All Data Compiled Into dataString: |" + dataString + "|}"); 
-  //else if(debugType == "dataCompileSD")       Serial.println("{DEBUG - LOOP SUCCESS: dataStringSD Sotred As |" + dataString_SD + "|}"); 
+  else if(debugType == "dataCompile_SUCCESS") Serial.println("{DEBUG - LOOP SUCCESS: All Data Compiled Into dataString: |" + dataString + "|}"); 
+  else if(debugType == "dataCompileSD")       Serial.println("{DEBUG - LOOP SUCCESS: dataStringSD Sotred As |" + dataString_SD + "|}"); 
   else if(debugType == "writeToSD")           Serial.println(F("{DEBUG - LOOP CHANGE: Attempting To Write dataStringSD To SD Card...}"));
   else if(debugType == "writeToSD_ERROR")     Serial.println(F("{DEBUG - LOOP ERROR: Error Opening datalog.csv. :<}"));
   else if(debugType == "writeToSD_SUCCESS")   Serial.println(F("{DEBUG - LOOP SUCCESS: dataString Successfully Written To The SD Card! :>}"));
@@ -155,7 +157,7 @@ void debugView(String debugType)  //Viewing Debug Messages
   else if(debugType == "SETUP")               Serial.println(F("{DEBUG - SETUP: Program Entered setup; Running Initialization Code...}"));
   else if(debugType == "SETUP_SUCCESS")       Serial.println(F("{DEBUG - SETUP SUCCESS: All Tests Complete; Control Passed To System Loop!! :D}"));
   else if(debugType == "beginBuzzer")         Serial.println(F("{DEBUG - LOOP CHANGE: Signal Recieved From Door Pin; Buzzer Begins To Play! :>}"));
-  //else                                        Serial.println("{DEBUG - DEBUGVIEW: No debugView Option For \"" + debugType + "\"}");*/
+  else                                        Serial.println("{DEBUG - DEBUGVIEW: No debugView Option For \"" + debugType + "\"}");
 }
 void initPinModes() //Set-Up: Pins
 {
@@ -252,6 +254,7 @@ void blinkLED() //Blink The LED; Does Not Perform Time-Related Functions
   onLED = !onLED; //LED State Has Flipped, So Edit Accordingly!
 }
 void playNote() { //Play Current Note, And Prepare For The Next
+  
   debugView("playNote");
   noTone(BUZZER_PIN); //Stop Playing On The Buzzer
   if(mrSandman) {
@@ -261,7 +264,7 @@ void playNote() { //Play Current Note, And Prepare For The Next
     }
     noteDuration = (60.0 / float(mrBPM) / (float(mrDurations[noteSeq])/4.0) * 1000); //Duration(ms) Of Given Note
     debugView("playNote_MrSand");
-    //tone(BUZZER_PIN, mrNotesArr[noteSeq], noteDuration);
+    tone(BUZZER_PIN, mrNotesArr[noteSeq], noteDuration);
   }
   else {
     if(noteSeq == etrSize) { //If All Notes Have Played, Onto The Next Song!
@@ -270,7 +273,7 @@ void playNote() { //Play Current Note, And Prepare For The Next
     }
     noteDuration = (60.0 / float(etrBPM) / (float(etrDurations[noteSeq])/4.0) * 1000); //Duration(ms) Of Given Note
     debugView("playNote_EnterSand");
-    //tone(BUZZER_PIN, etrNotesArr[noteSeq], noteDuration);
+    tone(BUZZER_PIN, etrNotesArr[noteSeq], noteDuration);
   }
   noteSeq++;
 }
@@ -368,6 +371,15 @@ bool writeToHC12()
   Serial1.println(dataString);  //Print To HC12 Radio
   return true;
 }
+
+/*void doorCheck() {
+  int newVal = analogRead(DOOR_PIN);
+  if (abs(newVal - lastVal) > 25) { // 25 filters out raw electrical noise
+    isMoving = true;
+    lastVal = newVal;
+  }
+}*/
+
 void setup() {
   //STATE = "STANDBY"; 
   debugView("SETUP");
@@ -375,17 +387,17 @@ void setup() {
   initBMP();
   initBNO(); 
   initGNSS();
-  if(myGNSS.getPVT() && myGNSS.getGnssFixOk()) {  //Attempt To Set Ground Level
-    groundLevel = myGNSS.getAltitudeMSL() / 1000.0;
-    debugView("set_groundLevel");
-  }
+  /*}
   else {
     debugView("set_gL_ERROR");
-  }
+  }*/
   initSD();
   headerSD();
   initHC12();
   debugView("SETUP_SUCCESS");
+  //analogReadResolution(12); //door servo setup
+  //lastVal = analogRead(DOOR_PIN);
+  pinMode(DOOR_PIN,INPUT);
 }
 
 void loop() {
@@ -403,7 +415,8 @@ void loop() {
       msLastBlink = millis();
     }
   //Buzzer Melody:
-    if(!songTime && digitalRead(DOOR_PIN)) {  //"digitalRead(DOOR_PIN)" Is An Attempt To Read From A PWM Signal From The Controller; Find Some Way To Read From The PWM, And Use That Instead. The Buzzer Code Works, And Should Start Playing Once Signal Is Recieved
+    //doorCheck();
+    if(!songTime && digitalRead(DOOR_PIN)==HIGH) {  //"digitalRead(DOOR_PIN)" Is An Attempt To Read From A PWM Signal From The Controller; Find Some Way To Read From The PWM, And Use That Instead. The Buzzer Code Works, And Should Start Playing Once Signal Is Recieved
       songTime = true;
       debugView("beginBuzzer");
     }
@@ -411,6 +424,7 @@ void loop() {
       playNote();
       msLastNote = millis();
     }
+
   //Output Sensor Data:
     storeTime = millis();
     if(millis() - msLastBMPPull >= msBMPPullRate) {
