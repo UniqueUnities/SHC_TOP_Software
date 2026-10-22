@@ -32,16 +32,16 @@ end
 signals = {
     'Longitude','Longitude','deg', [-87, -86];
     'Latitude','Latitude','deg', [34, 35];
-    'Altitude','Altitude','m', [100, 3000];
+    'Altitude','Altitude','ft', [0, 1500];
     'Pressure','Pressure','hPa', [700, 1100];
-    'Temperature','Temperature','°C', [-10, 40];
+    'Temperature','Temperature','°F', [-10, 100];
     'Roll','Roll','deg', [-30, 30];
     'Pitch','Pitch','deg', [-10, 15];
     'Yaw','Yaw','deg', [0, 360];
     'Ax','Acceleration (x)','m/s^2', [-20, 20];
     'Ay','Acceleration (y)','m/s^2', [-20, 20];
     'Az','Acceleration (z)','m/s^2', [-20, 20];
-    'Speed','Speed','km/h', [0, Inf]
+    'Speed','Speed','mph', [0, Inf]
 };
 
 t_ms = T.Time; % retrieves data regarding time in milliseconds
