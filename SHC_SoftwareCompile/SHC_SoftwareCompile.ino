@@ -333,7 +333,7 @@ bool readGNSS(int attempts) //Read Data From GNSS
 {
   gps.prefetchData();
   byte SIV = gps.getSIV();
-  if(SIV>0) {  //If GNSS Can Read Data
+  if(gps.getSIV() > 3) {  //If GNSS Can Read Data
     //long rawLat = myGNSS.getLatitude();
     //long rawLong = myGNSS.getLongitude();
     //decimalLat = rawLat / 10000000.0;
@@ -362,9 +362,9 @@ bool readGNSS(int attempts) //Read Data From GNSS
 
     //Serial.println();
     speed = myGNSS.getGroundSpeed()/447.04;
-    Serial.print(F(" Speed: "));
-    Serial.print(speed);
-    Serial.print(F(" (mph)"));
+    //Serial.print(F(" Speed: "));
+    //Serial.print(speed);
+    //Serial.print(F(" (mph)"));
 
     //byte SIV = myGNSS.getSIV();
     //gnssFix = myGNSS.getGnssFixOk();
@@ -431,7 +431,7 @@ bool writeToSD()  //Send Data To SD Card
 {
   File dataFile = SD.open(fileName, FILE_WRITE); //Open File (Only One File Can Open At A Time)
   if(dataFile) { //If File Is Available, Write To It
-    dataFile.println(storeTime + dataString);
+    dataFile.println(storeTime + "," + dataString);
     dataFile.close();
     //debugView("writeToSD_SUCCESS");
     return true;
