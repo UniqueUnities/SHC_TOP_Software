@@ -173,7 +173,7 @@ bool readBMP(int attempts)  //Read Data From BMP388
 {
   if(bmp.performReading()) { //Ensure BMP388 Reads Correctly; Sets Error-Handling Values If Not
     temperature = (bmp.temperature * 1.8) + 32;
-    pressure = bmp.pressure / 100.0;
+    pressure = bmp.pressure / 100.0 / 68.948;
     return true;
   }
   temperature = -999999;
@@ -194,9 +194,9 @@ bool readBNO()  //Read Data From BNO055
     pitch = orientationData.orientation.z; 
   } 
   if(linearAccelData.type == SENSOR_TYPE_LINEAR_ACCELERATION) {
-    accelX = linearAccelData.acceleration.x;
-    accelY = linearAccelData.acceleration.y;
-    accelZ = linearAccelData.acceleration.z;
+    accelX = linearAccelData.acceleration.x * 3.28084;
+    accelY = linearAccelData.acceleration.y * 3.28084;
+    accelZ = linearAccelData.acceleration.z * 3.28084;
   }
   return true;
 }
@@ -241,7 +241,7 @@ bool writeToSD()  //Send Data To SD Card
 {
   File dataFile = SD.open(fileName, FILE_WRITE); //Open File (Only One File Can Open At A Time)
   if(dataFile) { //If File Is Available, Write To It
-    dataFile.println(storeTime + "," + dataString); //Time Not Native To SD Card, But Is To HC12 Radio; dataString Excludes Time Accordingly
+    dataFile.println(String(storeTime) + "," + dataString); //Time Not Native To SD Card, But Is To HC12 Radio; dataString Excludes Time Accordingly
     dataFile.close();
     return true;
   }
@@ -295,4 +295,5 @@ void loop() { //Loops & Conditional Cycles
   if(millis() - msLastRadio >= msRadioRate) {
     Serial1.println(dataString);  //Print Data To HC12 Radio
     msLastRadio = millis();
+  }
 }
