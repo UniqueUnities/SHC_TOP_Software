@@ -10,7 +10,6 @@ Download Git (GitBash).
 Sign-Up for GitHub.
 
 ### Step-by-Step GitHub Set-Up For Not-Yet Added Arduino Projects:
-<<<<<<< HEAD
 1. Navigate to Your Arduino Project Folder in File Explorer (ex. _Documents/Arduino/exampleProject/_)
 1.5. Navigate to your Project Folder in Git (using command **cd**)
 2. Initialize Git by running command: **git init**. This turns the project folder into a Git repository)
@@ -23,12 +22,10 @@ Sign-Up for GitHub.
 	**git remote add origin [GitHub HTTPS Link] (main)
 	git branch -M main
 	git push -u origin main**
-=======
 1. Above the list of files, select the "Add File" Dropdown menu, and click Upload files.
 2. Choose the specific file you would like to add.
 3. Type a Commit Message akin to "Uploaded [Software] File".
 4. Click Propose Changes.
->>>>>>> 1a9e6f675741074d55d94fc736c68672756e7c18
 
 ### Typical Workflow:
 When you make changes in Arduino that you wish to add to GitHub, commit and push your changes by running the commands:
