@@ -32,26 +32,51 @@ end
 signals = {
     'Longitude','Longitude','deg', [-87, -86];
     'Latitude','Latitude','deg', [34, 35];
-    'Altitude','Altitude','ft', [0, 1500];
-    'Pressure','Pressure','hPa', [0, 100];
+    'Altitude','Altitude','ft', [490, 1000];
+    'Pressure','Pressure','psi', [10, 50];
     'Temperature','Temperature','°F', [-10, 100];
-    'Roll','Roll','deg', [-180, 180];
-    'Pitch','Pitch','deg', [-90, 90];
+    'Roll','Roll','deg', [-90, 90];
+    'Pitch','Pitch','deg', [-60, 60];
     'Yaw','Yaw','deg', [0, 360];
-    'Ax','Acceleration (x)','m/s^2', [-20, 20];
-    'Ay','Acceleration (y)','m/s^2', [-20, 20];
-    'Az','Acceleration (z)','m/s^2', [-20, 20];
-    'Speed','Speed','mph', [0, Inf]
+    'Ax','Acceleration (x)','ft/s^2', [-120, 120];
+    'Ay','Acceleration (y)','ft/s^2', [-120, 120];
+    'Az','Acceleration (z)','ft/s^2', [-120, 120];
+    'Speed','Speed','mph', [0, 80]
 };
 
-t_ms = T.Time; % retrieves data regarding time in milliseconds
-tvalid = t_ms(isfinite(t_ms)); %retrieves valid data regarding time
-t_s = (t_ms - min(tvalid)) / 1000; %converts to seconds
+t_ms = T.Time; % time in milliseconds
+tvalid = t_ms(isfinite(t_ms)); % valid time samples
+t_s = (t_ms - min(tvalid)) / 1000; % convert to seconds
+
+% altitude setup
+launchThresh = 10; % ft above ground that counts as "in air"
+alt = T.Altitude; % get altitude values
+ok  = isfinite(t_s) & isfinite(alt) & alt >= 0 & alt <= 2000; % check numbers are valid
+groundAlt = 519.6; % specific value for the RCRC
+airborne  = ok & (alt > groundAlt + launchThresh);
+
+% flight window from ground speed
+spd = T.Speed;
+spd(spd < 0 | spd > 100) = NaN;
+moving = isfinite(spd) & spd > 8;
+
+dm = diff([0; moving(:); 0]);
+starts = find(dm ==  1);
+ends   = find(dm == -1) - 1;
+[~, k] = max(ends - starts); % longest contiguous run = the flight
+iUp   = starts(k);
+iDown = ends(k);
+
+% time actually above the altitude threshold, inside the flight window
+idx = (1:numel(alt))';
+inWindow = idx >= iUp & idx <= iDown;
+iAir = find(airborne & inWindow);
 
 % flight summary
 fprintf('Flight 1 Summary\n');
-% print flight time
-fprintf('Flight time: %.2f s\n', (max(tvalid) - min(tvalid)) / 1000);
+fprintf('Total time recorded: %.2f s\n', (max(tvalid) - min(tvalid)) / 1000);
+fprintf('Flight time: %.2f s (start %.2f s, end %.2f s)\n', ...
+    t_s(iDown) - t_s(iUp), t_s(iUp), t_s(iDown));
 
 n = size(signals, 1);
 % loops through each row in the array
@@ -145,20 +170,33 @@ signals = {
     'Roll','Roll','deg', [-180, 180];
     'Pitch','Pitch','deg', [-90, 90];
     'Yaw','Yaw','deg', [0, 360];
-    'Ax','Acceleration (x)','ft/s^2', [-20, 20];
-    'Ay','Acceleration (y)','ft/s^2', [-20, 20];
-    'Az','Acceleration (z)','ft/s^2', [-20, 20];
-    'Speed','Speed','mph', [0, Inf]
+    'Ax','Acceleration (x)','ft/s^2', [-100, 100];
+    'Ay','Acceleration (y)','ft/s^2', [-100, 100];
+    'Az','Acceleration (z)','ft/s^2', [-100, 100];
+    'Speed','Speed','mph', [0, 100]
 };
 
-t_ms = T.Time; % retrieves data regarding time in milliseconds
-tvalid = t_ms(isfinite(t_ms)); %retrieves valid data regarding time
-t_s = (t_ms - min(tvalid)) / 1000; %converts to seconds
+t_ms = T.Time; % time in milliseconds
+tvalid = t_ms(isfinite(t_ms)); % valid time samples
+t_s = (t_ms - min(tvalid)) / 1000; % convert to seconds
+
+% flight time from ground speed
+spd = T.Speed; % get sped
+spd(spd < 0 | spd > 100) = NaN; % check any corrupt/missing values for speed
+moving = isfinite(spd) & spd > 8; % speed after than 8 mph is moving
+
+dm = diff([0; moving(:); 0]);
+starts = find(dm ==  1);
+ends   = find(dm == -1) - 1;
+[~, k] = max(ends - starts); % longest contiguous run = the flight
+iUp   = starts(k);
+iDown = ends(k);
 
 % flight summary
-fprintf('Flight 2 Summary\n');
-% print flight time
-fprintf('Flight time: %.2f s\n', (max(tvalid) - min(tvalid)) / 1000);
+fprintf('Flight 1 Summary\n');
+fprintf('Total time recorded: %.2f s\n', (max(tvalid) - min(tvalid)) / 1000);
+fprintf('Flight time: %.2f s (start %.2f s, end %.2f s)\n', ...
+    t_s(iDown) - t_s(iUp), t_s(iUp), t_s(iDown));
 
 n = size(signals, 1);
 % loops through each row in the array
