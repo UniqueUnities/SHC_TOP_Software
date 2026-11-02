@@ -79,6 +79,13 @@ fprintf('Flight time: %.2f s (start %.2f s, end %.2f s)\n', ...
     t_s(iDown) - t_s(iUp), t_s(iUp), t_s(iDown));
 
 n = size(signals, 1);
+
+figure(1); % create window for all graphs from Flight 1
+set(gcf, 'Units', 'Normalized', 'Position', [0.1, 0.1, 0.8, 0.7]); % wide layout
+
+% uses 'flow' so MATLAB automatically wraps plots into logical rows and columns
+tiledlayout('flow'); 
+
 % loops through each row in the array
 for i = 1:n
     % retrieves data for the current row in the array
@@ -124,11 +131,11 @@ for i = 1:n
     yplot(~keep) = NaN;
 
     % plotting the graph for current column
-    figure;
-    plot(t_s, yplot, 'r.-', 'LineWidth', 2);
-    xlabel('Time (s)');
-    ylabel(sprintf('%s (%s)', label, unit));
-    title(sprintf('Flight 1: %s as a Function of Time', label));
+    nexttile; % moves to the first window tile
+    plot(t_s, yplot, 'r.-', 'LineWidth', 2); 
+    xlabel('Time (s)'); 
+    ylabel(sprintf('%s (%s)', label, unit)); 
+    title(sprintf('Flight 1: %s vs Time', label)); 
     grid on;
 end
 %----------------------------
@@ -200,6 +207,13 @@ fprintf('Flight time: %.2f s (start %.2f s, end %.2f s)\n', ...
     t_s(iDown) - t_s(iUp), t_s(iUp), t_s(iDown));
 
 n = size(signals, 1);
+
+figure(2); % create window for all graphs from Flight 2
+set(gcf, 'Units', 'Normalized', 'Position', [0.1, 0.1, 0.8, 0.7]); % wide layout
+
+% uses 'flow' so MATLAB automatically wraps plots into logical rows and columns
+tiledlayout('flow'); 
+
 % loops through each row in the array
 for i = 1:n
     % retrieves data for the current row in the array
@@ -245,11 +259,11 @@ for i = 1:n
     yplot(~keep) = NaN;
 
     % plotting the graph for current column
-    figure;
-    plot(t_s, yplot, 'b.-', 'LineWidth', 2);
-    xlabel('Time (s)');
-    ylabel(sprintf('%s (%s)', label, unit));
-    title(sprintf('Flight 2: %s as a Function of Time', label));
+    nexttile; % moves to the first window tile
+    plot(t_s, yplot, 'b.-', 'LineWidth', 2); 
+    xlabel('Time (s)'); 
+    ylabel(sprintf('%s (%s)', label, unit)); 
+    title(sprintf('Flight 2: %s vs Time', label)); 
     grid on;
 end
 %----------------------------
