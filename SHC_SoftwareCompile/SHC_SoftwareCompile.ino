@@ -1,6 +1,7 @@
 
 /*SHC - The One Plane: Full Software Code; Collective of All Software For The RCA Team #1 Aircraft
-  Created: 7 October 2026 | Modified: 22 October 2026 | By Arwyn & Seito*/
+  Created: 7 October 2026 | Modified: 22 October 2026 | By Arwyn & Seito
+  Sources: read_all_data program from the Adafruit BNO055 Library, Example1_GetPosition program from the SparkFun u-blox GNSS Arduino Library, bmp3xx_simpletest program from the Adafruit BMP3XX Library, Datalogger program from the Raspberry Pi Pico Board’s Library, and other SHC members*/
 #include <Wire.h> //Core I2C Communication
 #include <Adafruit_Sensor.h>  //General Altitude & Pressure Sensing
 #include "Adafruit_BMP3XX.h"  //BMP388 - Altitude & Pressure Sensing
